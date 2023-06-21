@@ -1,0 +1,15 @@
+@import url('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css');
+
+body,html {
+    font-family: 'Press Start 2P', cursive;
+    font-weight: 100;
+    background: #c4ceff;
+    color: #000000;
+    letter-spacing: 1px;
+    height: 100vh;
+}
+
+.row {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}

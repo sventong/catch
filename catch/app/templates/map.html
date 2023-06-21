@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+    <head>
+        <title>Map View</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'css/map.css' %}" />
+        <link rel="stylesheet" type="text/css" href="https://unpkg.com/leaflet/dist/leaflet.css" crossorigin=""/>
+        <script src="https://unpkg.com/leaflet/dist/leaflet.js" crossorigin=""></script>
+    </head>
+    <body>
+        <div id="map"></div>
+        <script src="{% static 'js/map.js' %}" defer></script>
+    </body>
+</html>
