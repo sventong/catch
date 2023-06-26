@@ -1,12 +1,24 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div id="map"></div>
+{% comment %} <div id="map"></div> {% endcomment %}
 
+
+<div class="container h-100 align-items-center text-center">
+
+    (Track - button)
+
+    Challenges cannot be duplicate in one game. We have to be able to track them
+
+    Money
+
+    Chat function, where you can post your completed challenges, if there is an image needed for proof
+
+</div>
 
 
 
 {% load static %}
-<script src="{% static 'js/map.js' %}" defer></script>
+{% comment %} <script src="{% static 'js/map.js' %}" defer></script> {% endcomment %}
 
 {% endblock content %}

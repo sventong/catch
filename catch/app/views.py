@@ -4,6 +4,9 @@ from django.http import HttpResponse
 from django.views.generic.base import TemplateView
 
 from .forms import JoinGameForm
+from django.conf import settings
+
+GOOGLE_MAPS_API_KEY = settings.GOOGLE_MAPS_API_KEY
 
 
 # Create your views here.
@@ -37,7 +40,11 @@ def game(request, game_id=""):
     }
     return render(request, 'game.html', context)
 
-class MapView(TemplateView):
-    template_name = "map.html"
+def map(request):
+    context = {
+        "api_key": GOOGLE_MAPS_API_KEY
+    }
+    
+    return render(request, "map.html", context)
 
 
