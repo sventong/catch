@@ -20,5 +20,15 @@
 
 {% load static %}
 {% comment %} <script src="{% static 'js/map.js' %}" defer></script> {% endcomment %}
+<script type="text/javascript"> 
+    let url = `ws://${window.location.host}/ws/socket-server/`
+
+    const chatSocket = new WebSocket(url)
+
+    chatSocket.onmessage = function(e){
+        let data = JSON.parse(e.data)
+        console.log('Data:', data)
+    }
+</script>
 
 {% endblock content %}
