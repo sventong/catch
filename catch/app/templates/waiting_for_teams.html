@@ -8,17 +8,32 @@
 
     <h1>WAITING FOR TEAMS</h1>
     
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="game-id-box">
+                Game ID: {{game_id}}
+            </div>
+        </div>
+    </div>
 
-    Build websocket so that incoming teams are immediately displayed.
-    Display Team Names, maybe nr of teammates.
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <table>
+                <tr id="teams">
+                    {% comment %} <td> Your team: </td>
+                    <td> {{team_name}} </td> {% endcomment %}
+                </tr>
+            </table>
+        </div>
+    </div>
 
 
-    
-
+    {% comment %} Build websocket so that incoming teams are immediately displayed.
+    Display Team Names, maybe nr of teammates. {% endcomment %}
 
     <div class="row">
         <div class="col-md-12 text-center">
-            <a href="{% url 'game' game_id="test" %}"> 
+            <a href="{% url 'game' game_id="testgame" %}"> 
                 <button type="submit" class="btn btn-dark btn-lg">Start The Game!</button>
             </a>
         </div>
@@ -35,19 +50,42 @@
 {% load static %}
 {% comment %} <script src="{% static 'js/map.js' %}" defer></script> {% endcomment %}
 <script type="text/javascript"> 
-    let url = `ws://${window.location.host}/ws/socket-server/`
+    
+function connect() {
 
-    const chatSocket = new WebSocket(url)
+    let game_id = '{{game_id}}'
+    let team_name = '{{team_name}}'
+    let url = `ws://${window.location.host}/ws/waiting/${game_id}/`
 
-    chatSocket.onmessage = function(e){
+    const waitSocket = new WebSocket(url)
+
+    waitSocket.onopen = function open() {
+        console.log("WebSockets connection created.");
+        waitSocket.send(JSON.stringify({
+            "event": "START",
+            "team_name": team_name
+        }))
+    };
+
+    waitSocket.onclose = function (e) {
+        console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+        setTimeout(function () {
+            connect();
+        }, 1000);
+    };
+
+    waitSocket.onmessage = function(e){
         let data = JSON.parse(e.data)
         console.log('Data:', data)
 
-        if(data.type === 'chat'){
-            let messages = document.getElementById('messages')
+        let team_name = data['team_name']
+        let event = data['event']
+        console.log(event)
+        if(event === 'NEWTEAM'){
+            let teams_div = document.getElementById('teams')
 
-            messages.insertAdjacentHTML('beforeend', `<div> 
-                <p>${data.message}</p>
+            teams_div.insertAdjacentHTML('beforeend', `<div> 
+                <p>${team_name}</p>
             </div>`)
         }
     }
@@ -62,6 +100,10 @@
         }))
         form.reset
     })
+}
+
+
+    connect();
 </script>
 
 {% endblock content %}

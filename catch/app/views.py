@@ -70,13 +70,41 @@ def waiting_for_teams(request):
         if form.is_valid():
             team_name = form.cleaned_data['team_name']
             game_id = form.cleaned_data['game_id']
-            nr_of_players = form.cleaned_data['nr_of_players']
 
             game = Game(game_id=game_id)
             game.save()
 
-            team = Team(game_id=game, team_name = team_name, number_of_players = nr_of_players)
+            team = Team(game_id=game, team_name = team_name)
             team.save()
-
     
-    return render(request, 'waiting_for_teams.html')
+    elif request.method == "GET":
+        print(request.body)
+    context = {
+        "game_id": game_id,
+        "team_name": team_name
+    }
+    return render(request, 'waiting_for_teams.html', context)
+
+def join_game(request):
+    if request.method == "POST":
+        form = JoinGameForm(request.POST)
+        if form.is_valid():
+            game_id = form.cleaned_data['game_id']
+            game = Game.objects.filter(game_id=game_id)
+            if game.exists():
+
+                team_name = form.cleaned_data['team_name']
+                team = Team(game_id=game.first(), team_name = team_name)
+                team.save()
+                
+                context = {
+                    "game_id": game_id,
+                    "team_name": team_name
+                }
+                return render(request, 'waiting_for_teams.html', context)
+
+            else:
+                context = {"form": form,
+                           "error_message": "GameID does not exist"}
+
+                return render(request, 'home.html', context)

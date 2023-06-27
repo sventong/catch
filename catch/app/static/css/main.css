@@ -9,8 +9,20 @@ body,html {
     height: 100vh;
 }
 
+.container {
+    margin-top: 3em;
+}
+
 .row {
     margin-top: 20px;
     margin-bottom: 20px;
+}
+
+.game-id-box {
+    border: #000000;
+    border-style: solid;
+    padding-top: 2em;
+    padding-bottom: 2em;
+    display: block;
 }
 
