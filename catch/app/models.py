@@ -13,4 +13,4 @@ class Game(models.Model):
 class Team(models.Model):
     game_id = models.ForeignKey(Game, on_delete=models.CASCADE)
     team_name = models.CharField(max_length=30)
-    number_of_players = models.IntegerField()
+    # TODO Solo or Team
