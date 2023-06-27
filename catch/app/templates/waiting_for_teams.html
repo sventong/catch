@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% comment %} <div id="map"></div> {% endcomment %}
+
+
+<div class="container h-100 align-items-center text-center">
+
+    <h1>WAITING FOR TEAMS</h1>
+    
+
+    Build websocket so that incoming teams are immediately displayed.
+    Display Team Names, maybe nr of teammates.
+
+
+    
+
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <a href="{% url 'game' game_id="test" %}"> 
+                <button type="submit" class="btn btn-dark btn-lg">Start The Game!</button>
+            </a>
+        </div>
+    </div>
+
+
+    <div id="messages"></div>
+
+
+</div>
+
+
+
+{% load static %}
+{% comment %} <script src="{% static 'js/map.js' %}" defer></script> {% endcomment %}
+<script type="text/javascript"> 
+    let url = `ws://${window.location.host}/ws/socket-server/`
+
+    const chatSocket = new WebSocket(url)
+
+    chatSocket.onmessage = function(e){
+        let data = JSON.parse(e.data)
+        console.log('Data:', data)
+
+        if(data.type === 'chat'){
+            let messages = document.getElementById('messages')
+
+            messages.insertAdjacentHTML('beforeend', `<div> 
+                <p>${data.message}</p>
+            </div>`)
+        }
+    }
+
+    let form = document.getElementById('form')
+    
+    form.addEventListener('submit', (e)=> {
+        e.preventDefault()
+        let message = e.target.message.value
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }))
+        form.reset
+    })
+</script>
+
+{% endblock content %}
