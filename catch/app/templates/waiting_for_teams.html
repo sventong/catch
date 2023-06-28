@@ -26,6 +26,10 @@
                         <p>{{ot}}</p>
                     </tr>
                     {% endfor %}
+                {% else %}
+                    <tr id="teams">
+                        <p>{{team_name}}</p>
+                    </tr>
                 {% endif %}
                     {% comment %} <td> Your team: </td>
                     <td> {{team_name}} </td> {% endcomment %}
