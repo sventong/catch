@@ -70,15 +70,19 @@ def waiting_for_teams(request):
         if form.is_valid():
             team_name = form.cleaned_data['team_name']
             game_id = form.cleaned_data['game_id']
+            game_master = form.cleaned_data['game_master']
 
             game = Game(game_id=game_id)
             game.save()
 
-            team = Team(game_id=game, team_name = team_name)
+            team = Team(game_id = game, 
+                        team_name = team_name, 
+                        game_master = game_master)
             team.save()
     
     elif request.method == "GET":
         print(request.body)
+    
     context = {
         "game_id": game_id,
         "team_name": team_name
@@ -92,9 +96,10 @@ def join_game(request):
             game_id = form.cleaned_data['game_id']
             game = Game.objects.filter(game_id=game_id)
             if game.exists():
-
+                
                 team_name = form.cleaned_data['team_name']
-                team = Team(game_id=game.first(), team_name = team_name)
+                game_master = form.cleaned_data['game_master']
+                team = Team(game_id=game.first(), team_name = team_name, game_master = game_master)
                 team.save()
                 
                 context = {
