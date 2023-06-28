@@ -85,26 +85,35 @@ def waiting_for_teams(request):
     
     context = {
         "game_id": game_id,
-        "team_name": team_name
+        "team_name": team_name,
+        "game_master": game_master
     }
     return render(request, 'waiting_for_teams.html', context)
 
 def join_game(request):
+    
     if request.method == "POST":
         form = JoinGameForm(request.POST)
+        print(form)
         if form.is_valid():
+            print("form valid")
             game_id = form.cleaned_data['game_id']
             game = Game.objects.filter(game_id=game_id)
             if game.exists():
+                print("game exist")
                 
                 team_name = form.cleaned_data['team_name']
                 game_master = form.cleaned_data['game_master']
+                other_teams = Team.objects.filter(game_id = game.first()).values_list("team_name", flat=True)
+                
                 team = Team(game_id=game.first(), team_name = team_name, game_master = game_master)
                 team.save()
-                
+            
                 context = {
                     "game_id": game_id,
-                    "team_name": team_name
+                    "other_teams": other_teams,
+                    "team_name": team_name,
+                    "game_master": game_master
                 }
                 return render(request, 'waiting_for_teams.html', context)
 
@@ -113,3 +122,6 @@ def join_game(request):
                            "error_message": "GameID does not exist"}
 
                 return render(request, 'home.html', context)
+
+        else:
+            return HttpResponse("was da los")

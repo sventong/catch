@@ -18,11 +18,17 @@
 
     <div class="row">
         <div class="col-md-8 offset-md-2">
+            Waiting for all teams to join
             <table>
-                <tr id="teams">
+                {% if game_master == False %}
+                    {% for ot in other_teams %}
+                    <tr id="teams">
+                        <p>{{ot}}</p>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
                     {% comment %} <td> Your team: </td>
                     <td> {{team_name}} </td> {% endcomment %}
-                </tr>
             </table>
         </div>
     </div>
@@ -83,9 +89,10 @@
             if(event === 'NEWTEAM'){
                 let teams_div = document.getElementById('teams')
     
-                teams_div.insertAdjacentHTML('beforeend', `<div> 
-                    <p>${team_name}</p>
-                </div>`)
+                teams_div.insertAdjacentHTML('beforeend', 
+                                             `<tr id="teams">
+                                                <p>${team_name}</p>
+                                              </tr>`)
             }
         }
     }

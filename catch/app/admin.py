@@ -8,6 +8,6 @@ class GameAdmin(admin.ModelAdmin):
 
 admin.site.register(Game, GameAdmin)
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ('game_id', 'team_name')
+    list_display = ('game_id', 'team_name', 'game_master')
 
 admin.site.register(Team, TeamAdmin)
