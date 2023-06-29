@@ -24,9 +24,9 @@
                     {{ form.team_name|add_label_class:"label_class" }}
                     {% render_field form.team_name placeholder=form.team_name.label %}
                 </div>
-                <div class="form-group">
+                {% comment %} <div class="form-group">
                     {% render_field form.game_master type="hidden" %}
-                </div>
+                </div> {% endcomment %}
                 <button type="submit" class="btn btn-dark btn-lg">Create Game</button>
             </form>
         </div>

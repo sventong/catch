@@ -23,7 +23,7 @@ ROLE_CHOICES = {
     (CHA, "Chaser")
 }
 class Team(models.Model):
-    game_id = models.ForeignKey(Game, on_delete=models.CASCADE)
+    game = models.ForeignKey(Game, on_delete=models.CASCADE)
     team_name = models.CharField(max_length=30)
     game_master = models.BooleanField()
     role = models.CharField(max_length=20, choices = ROLE_CHOICES, null=True)

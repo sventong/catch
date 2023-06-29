@@ -11,7 +11,7 @@
     <div class="row">
         <div class="col-md-6 offset-md-3">
             <div class="game-id-box">
-                Game ID: {{game_id}}
+                Game ID: {{game.game_id}}
             </div>
         </div>
     </div>
@@ -21,7 +21,7 @@
             Waiting for all teams to join
             <table id="teams">
                 {% for t in all_teams %}
-                    {% if t == team_name %}
+                    {% if t == curr_team.team_name %}
                         <tr>
                             <th>{{t}}</th>
                             <th class="pl-4 float-right"> - Your Team </th>
@@ -41,10 +41,11 @@
 
     {% comment %} Build websocket so that incoming teams are immediately displayed.
     Display Team Names, maybe nr of teammates. {% endcomment %}
-    {% if game_master == True %}
+    
+    {% if curr_team.game_master == True %}
         <div class="row">
             <div class="col-md-12 text-center">
-                <a href="{% url 'game' game_id = game_id %}"> 
+                <a href="{% url 'game' game_id=game.game_id %}"> 
                     <button type="submit" class="btn btn-dark btn-lg">Start The Game!</button>
                 </a>
             </div>
@@ -64,8 +65,8 @@
     
     function connect() {
 
-        let game_id = '{{game_id}}'
-        let curr_team = '{{team_name}}'
+        let game_id = '{{game.game_id}}'
+        let curr_team_name = '{{curr_team.team_name}}'
         let url = `ws://${window.location.host}/ws/waiting/${game_id}/`
     
         const waitSocket = new WebSocket(url)
@@ -74,7 +75,7 @@
             console.log("WebSockets connection created.");
             waitSocket.send(JSON.stringify({
                 "event": "START",
-                "team_name": curr_team
+                "team_name": curr_team_name
             }))
         };
     
@@ -91,9 +92,7 @@
     
             let team_name = data['team_name']
             let event = data['event']
-            console.log(curr_team)
-            console.log(team_name)
-            if(event === 'NEWTEAM' && curr_team !== team_name){
+            if(event === 'NEWTEAM' && curr_team_name !== team_name){
                 let teams_div = document.getElementById('teams')
     
                 teams_div.insertAdjacentHTML('beforeend', 

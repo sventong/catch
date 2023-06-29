@@ -67,30 +67,37 @@ def waiting_for_teams(request):
     if request.method == "POST":
         form = CreateGameForm(request.POST)
         if form.is_valid():
+            game_id = random_game_id()
             team_name = form.cleaned_data['team_name']
-            game_master = form.cleaned_data['game_master']
 
-            game = Game(game_id = random_game_id())
+            request.session['current_game'] = game_id
+            request.session['current_team'] = team_name
+            
+            game = Game(game_id = game_id)
             game.save()
-            game_id = game.game_id
-            print(game)
 
-            team = Team(game_id = game, 
-                        team_name = team_name, 
-                        game_master = game_master)
-            team.save()
+            curr_team = Team(game = game, 
+                             team_name = team_name, 
+                             game_master = True)
+            curr_team.save()
 
-            all_teams = Team.objects.filter(game_id = Game.objects.filter(game_id=game_id).first()).values_list("team_name", flat=True)
+            # all_teams = Team.objects.filter(game = game).values_list("team_name", flat=True)
             # all_teams = Team.objects.filter(game_id = Game.objects.get(game_id=game_id)).values_list("team_name", flat=True)
 
-    
+            
     elif request.method == "GET":
-        print(request.body)
-    
+        
+        game_id = request.session['current_game']
+        team_name = request.session['current_team']
+
+    game = Game.objects.get(game_id = game_id)
+    curr_team = Team.objects.get(game = game, team_name = team_name)
+    all_teams = Team.objects.filter(game = game).values_list("team_name", flat=True)
+
+
     context = {
-        "game_id": game.game_id,
-        "team_name": team_name,
-        "game_master": game_master,
+        "game": game,
+        "curr_team": curr_team,
         "all_teams": all_teams
     }
     return render(request, 'waiting_for_teams.html', context)
@@ -98,28 +105,25 @@ def waiting_for_teams(request):
 def join_game(request):
     
     if request.method == "POST":
-        form = JoinGameForm(request.POST)
-        print(form)
+        form = JoinGameForm(request.POST) 
         if form.is_valid():
-            print("form valid")
             game_id = form.cleaned_data['game_id'].upper()
             game = Game.objects.filter(game_id=game_id)
-            if game.exists():
-                print("game exist")
-                
+            if game.exists():                
                 team_name = form.cleaned_data['team_name']
-                game_master = form.cleaned_data['game_master']
-                
-                team = Team(game_id=game.first(), team_name = team_name, game_master = game_master)
+
+                request.session['current_game'] = game_id
+                request.session['current_team'] = team_name
+
+                team = Team(game = game.first(), team_name = team_name, game_master = False)
                 team.save()
 
-                all_teams = Team.objects.filter(game_id = game.first()).values_list("team_name", flat=True)
-
+                all_teams = Team.objects.filter(game = game.first()).values_list("team_name", flat=True)
+                
                 context = {
-                    "game_id": game_id,
+                    "game": game.first(),
+                    "curr_team": team,
                     "all_teams": all_teams,
-                    "team_name": team_name,
-                    "game_master": game_master
                 }
                 return render(request, 'waiting_for_teams.html', context)
 
@@ -131,3 +135,19 @@ def join_game(request):
 
         else:
             return HttpResponse("was da los")
+        
+    elif request.method == "GET":
+        
+        game_id = request.session['current_game']
+        team_name = request.session['current_team']
+
+        game = Game.objects.get(game_id = game_id)
+        curr_team = Team.objects.get(game = game, team_name = team_name)
+        all_teams = Team.objects.filter(game = game).values_list("team_name", flat=True)
+
+        context = {
+            "game": game,
+            "curr_team": curr_team,
+            "all_teams": all_teams
+        }
+        return render(request, 'waiting_for_teams.html', context)
