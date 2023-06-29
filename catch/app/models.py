@@ -15,9 +15,48 @@ class Game(models.Model):
     def __str__(self):
         return f"{self.game_id}"
 
+RUN = "RUNNER"
+CHA = "CHASER"
+
+ROLE_CHOICES = {
+    (RUN, "Runner"),
+    (CHA, "Chaser")
+}
 class Team(models.Model):
     game_id = models.ForeignKey(Game, on_delete=models.CASCADE)
     team_name = models.CharField(max_length=30)
     game_master = models.BooleanField()
+    role = models.CharField(max_length=20, choices = ROLE_CHOICES, null=True)
+    points = models.IntegerField(null=True)
+    money = models.IntegerField(null=True)
+    jail_time = models.IntegerField(null=True)
+    jail_time_start = models.DateTimeField(null=True)
+
     # TODO Solo or Team
+
+class Catch(models.Model):
+    catched_team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    timestamp = models.DateTimeField()
+
+class Challenge(models.Model):
+    name = models.CharField(max_length=255)
+    challenge_text = models.TextField()
+    reward = models.IntegerField()
+
+class TransportType(models.Model):
+    name = models.CharField(max_length=20)
+    cost_per_station = models.IntegerField()
+
+class ChallengeDoneByTeam(models.Model):
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    successful = models.BooleanField()
+    timestamp = models.DateTimeField()
+    
+
+class TransportDoneByTeam(models.Model):
+    transport_type = models.ForeignKey(TransportType, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    stops = models.IntegerField()
+    timestamp = models.DateTimeField()
 
