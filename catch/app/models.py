@@ -1,9 +1,14 @@
+import uuid
+import random
+import string
+
 from django.db import models
 
 # Create your models here.
 
+
 class Game(models.Model):
-    game_id = models.CharField(max_length=10)
+    game_id = models.CharField(max_length=10, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -15,3 +20,4 @@ class Team(models.Model):
     team_name = models.CharField(max_length=30)
     game_master = models.BooleanField()
     # TODO Solo or Team
+

@@ -19,18 +19,19 @@
     <div class="row">
         <div class="col-md-8 offset-md-2">
             Waiting for all teams to join
-            <table>
-                {% if game_master == False %}
-                    {% for ot in other_teams %}
-                    <tr id="teams">
-                        <p>{{ot}}</p>
-                    </tr>
-                    {% endfor %}
-                {% else %}
-                    <tr id="teams">
-                        <p>{{team_name}}</p>
-                    </tr>
-                {% endif %}
+            <table id="teams">
+                {% for t in all_teams %}
+                    {% if t == team_name %}
+                        <tr>
+                            <th>{{t}}</th>
+                            <th class="pl-4 float-right"> - Your Team </th>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <th>{{t}}</th>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
                     {% comment %} <td> Your team: </td>
                     <td> {{team_name}} </td> {% endcomment %}
             </table>
@@ -40,14 +41,15 @@
 
     {% comment %} Build websocket so that incoming teams are immediately displayed.
     Display Team Names, maybe nr of teammates. {% endcomment %}
-
-    <div class="row">
-        <div class="col-md-12 text-center">
-            <a href="{% url 'game' game_id="testgame" %}"> 
-                <button type="submit" class="btn btn-dark btn-lg">Start The Game!</button>
-            </a>
+    {% if game_master == True %}
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <a href="{% url 'game' game_id = game_id %}"> 
+                    <button type="submit" class="btn btn-dark btn-lg">Start The Game!</button>
+                </a>
+            </div>
         </div>
-    </div>
+    {% endif %}
 
 
     <div id="messages"></div>
@@ -63,7 +65,7 @@
     function connect() {
 
         let game_id = '{{game_id}}'
-        let team_name = '{{team_name}}'
+        let curr_team = '{{team_name}}'
         let url = `ws://${window.location.host}/ws/waiting/${game_id}/`
     
         const waitSocket = new WebSocket(url)
@@ -72,7 +74,7 @@
             console.log("WebSockets connection created.");
             waitSocket.send(JSON.stringify({
                 "event": "START",
-                "team_name": team_name
+                "team_name": curr_team
             }))
         };
     
@@ -89,14 +91,15 @@
     
             let team_name = data['team_name']
             let event = data['event']
-            console.log(event)
-            if(event === 'NEWTEAM'){
+            console.log(curr_team)
+            console.log(team_name)
+            if(event === 'NEWTEAM' && curr_team !== team_name){
                 let teams_div = document.getElementById('teams')
     
                 teams_div.insertAdjacentHTML('beforeend', 
-                                             `<tr id="teams">
-                                                <p>${team_name}</p>
-                                              </tr>`)
+                                             `<div>
+                                                <th>${team_name}</th>
+                                             </div>`)
             }
         }
     }
