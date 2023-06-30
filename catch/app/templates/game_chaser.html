@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% comment %} <div id="map"></div> {% endcomment %}
+
+
+<div class="container h-100 align-items-center text-center">
+    <h1> CHASE </h1>
+    (Track - button)
+
+    Challenges cannot be duplicate in one game. We have to be able to track them
+
+    Money
+
+    Chat function, where you can post your completed challenges, if there is an image needed for proof
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            {% comment %} <a href="{% url 'game' %}">
+                <button type="submit" class="btn btn-dark btn-lg">CATCH !</button>
+            </a> {% endcomment %}
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <a href="{% url 'game' game_id=game.game_id  %}"> 
+                <button type="submit" class="btn btn-dark btn-lg" id="catch">CATCH !</button>
+            </a>
+        </div>
+    </div>
+
+</div>
+
+
+
+{% load static %}
+
+<script type="text/javascript"> 
+    
+    function connect() {
+
+        let game_id = '{{game.game_id}}'
+        let curr_team_name = '{{curr_team.team_name}}'
+        let url = `ws://${window.location.host}/ws/game/${game_id}/`
+    
+        const waitSocket = new WebSocket(url)
+    
+        waitSocket.onopen = function open() {
+            console.log("WebSockets connection created.");
+        };
+    
+        waitSocket.onclose = function (e) {
+            console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+            setTimeout(function () {
+                connect();
+            }, 1000);
+        };
+    
+        waitSocket.onmessage = function(e){
+            let data = JSON.parse(e.data)
+            console.log('Data:', data)
+    
+            let team_name = data['team_name']
+            let event = data['event']
+            if (event === 'NEWTEAM' && curr_team_name !== team_name){
+                let teams_div = document.getElementById('teams')
+    
+                teams_div.insertAdjacentHTML('beforeend', 
+                                             `<div>
+                                                <th>${team_name}</th>
+                                             </div>`)
+            } else if (event === 'START-GAME') {
+                document.getElementById("start-game-button").click();
+            }
+        };
+
+
+        document.getElementById('catch').onclick = function() {
+            waitSocket.send(JSON.stringify({
+                "event": "CATCH",
+                "game_id": game_id
+            }))
+        }
+    }
+
+    connect();
+</script> 
+
+{% endblock content %}

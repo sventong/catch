@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from django.views.generic.base import TemplateView
 
 from .forms import JoinGameForm, CreateGameForm
-from .models import Game, Team
+from .models import Game, Team, ROLE_CHOICES
 from .utils import random_game_id
 from django.conf import settings
 
@@ -33,24 +33,49 @@ def index(request):
 
 #     return HttpResponse(game_id)
 
+    # nr_of_teams = teams.count()
+    
+
+
 def game(request, game_id=""):
+    
+    current_game = Game.objects.get(game_id = request.session['current_game'])
+    current_team = Team.objects.get(team_name = request.session['current_team'], game = current_game)
+    state = request.session['state']
+    all_teams = Team.objects.filter(game_id = current_game)
+    
+    print(state)
+    print(current_team.game_master)
 
-    game_id = request.session['current_game']
-    print(game_id)
+    if current_team.game_master == True and state == 'waiting':
+        print('RUNNER wird ausgewählt')
+        Team.objects.filter(game_id = current_game).update(role="CHASER")
+        random_team = random.choice(list(all_teams))
+        Team.objects.filter(pk = random_team.pk).update(role="RUNNER")
+        
+        request.session['state'] = 'init_game'
+        print(Team.objects.filter(game = current_game, role="RUNNER").first())
 
-    game = Game.objects.get(game_id = game_id)
-    teams = Team.objects.filter(game = game)
-    escape_team = random.sample(list(teams), 1)
-
-    print(escape_team)
-
-
-
+        # runner_team = Team.objects.filter(pk=runner_team_pk)
+    
+    runner_team = Team.objects.filter(game = current_game, role="RUNNER").first()
 
     context = {
-        "game_id": game_id
+        "game": current_game,
+        "curr_team": current_team,
+        "all_teams": all_teams
     }
-    return render(request, 'game.html', context)
+
+    request.session['current_game'] = game_id
+    request.session['current_team'] = current_team.team_name
+    
+    print(current_team)
+    print(runner_team)
+    if current_team == runner_team:
+        return render(request, 'game_runner.html', context)
+    else:
+        return render(request, 'game_chaser.html', context)
+
 
 def map(request):
     context = {
@@ -82,6 +107,7 @@ def waiting_for_teams(request):
 
             request.session['current_game'] = game_id
             request.session['current_team'] = team_name
+            request.session['state'] = 'waiting'
             
             game = Game(game_id = game_id)
             game.save()
@@ -124,6 +150,7 @@ def join_game(request):
 
                 request.session['current_game'] = game_id
                 request.session['current_team'] = team_name
+                request.session['state'] = 'waiting'
 
                 team = Team(game = game.first(), team_name = team_name, game_master = False)
                 team.save()

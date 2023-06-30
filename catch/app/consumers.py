@@ -58,9 +58,9 @@ class WaitingConsumer(WebsocketConsumer):
 
         self.accept()
 
-    def disconnect(self):
+    def disconnect(self, code):
         print("Disconnected")
-
+        print(code)
         # Join room group
         async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,

@@ -102,7 +102,9 @@
                                                 <th>${team_name}</th>
                                              </div>`)
             } else if (event === 'START-GAME') {
-                document.getElementById("start-game-button").click();
+                setTimeout(function () {
+                    document.getElementById("start-game-button").click();
+                }, 2000);
             }
         };
 
@@ -114,7 +116,6 @@
             }))
         }
     }
-
     connect();
 
     
