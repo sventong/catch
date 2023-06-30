@@ -41,16 +41,18 @@
 
     {% comment %} Build websocket so that incoming teams are immediately displayed.
     Display Team Names, maybe nr of teammates. {% endcomment %}
-    
-    {% if curr_team.game_master == True %}
-        <div class="row">
-            <div class="col-md-12 text-center">
-                <a href="{% url 'game' game_id=game.game_id %}"> 
-                    <button type="submit" class="btn btn-dark btn-lg">Start The Game!</button>
-                </a>
-            </div>
+        
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <a href="{% url 'game' game_id=game.game_id %}">
+                {% if curr_team.game_master == True %}
+                    <button type="submit" class="btn btn-dark btn-lg" id="start-game-button">Start The Game!</button>
+                {% else %}
+                    <button type="submit" class="btn btn-dark btn-lg secret-btn" id="start-game-button">Start The Game!</button>
+                {% endif %}
+            </a>
         </div>
-    {% endif %}
+    </div>
 
 
     <div id="messages"></div>
@@ -92,18 +94,30 @@
     
             let team_name = data['team_name']
             let event = data['event']
-            if(event === 'NEWTEAM' && curr_team_name !== team_name){
+            if (event === 'NEWTEAM' && curr_team_name !== team_name){
                 let teams_div = document.getElementById('teams')
     
                 teams_div.insertAdjacentHTML('beforeend', 
                                              `<div>
                                                 <th>${team_name}</th>
                                              </div>`)
+            } else if (event === 'START-GAME') {
+                document.getElementById("start-game-button").click();
             }
+        };
+
+
+        document.getElementById('start-game-button').onclick = function() {
+            waitSocket.send(JSON.stringify({
+                "event": "START-GAME",
+                "game_id": game_id
+            }))
         }
     }
-    
+
     connect();
+
+    
 </script>
     
 

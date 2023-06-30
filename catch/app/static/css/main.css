@@ -26,3 +26,6 @@ body,html {
     display: block;
 }
 
+.secret-btn {
+    visibility: hidden;
+}

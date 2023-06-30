@@ -1,4 +1,5 @@
 import json
+import random
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views.generic.base import TemplateView
@@ -34,8 +35,17 @@ def index(request):
 
 def game(request, game_id=""):
 
+    game_id = request.session['current_game']
     print(game_id)
-    game_id = request.GET.get('game_id')
+
+    game = Game.objects.get(game_id = game_id)
+    teams = Team.objects.filter(game = game)
+    escape_team = random.sample(list(teams), 1)
+
+    print(escape_team)
+
+
+
 
     context = {
         "game_id": game_id

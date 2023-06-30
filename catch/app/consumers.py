@@ -82,6 +82,18 @@ class WaitingConsumer(WebsocketConsumer):
                 }
             )
         
+        elif event == 'START-GAME':
+            game_id = response.get('game_id', None)
+
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'start_game',
+                    'game_id': game_id,
+                    'event': 'START-GAME'
+                }
+            )
+        
     
     def add_team(self, response):
         
@@ -90,5 +102,14 @@ class WaitingConsumer(WebsocketConsumer):
         
         self.send(text_data=json.dumps({
             "team_name": team_name,
+            "event": event,
+        }))
+
+    def start_game(self, response):
+        game_id = response["game_id"]
+        event = response["event"]
+
+        self.send(text_data=json.dumps({
+            "team_name": game_id,
             "event": event,
         }))
