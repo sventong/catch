@@ -1,48 +1,84 @@
 import json
+import random
+from datetime import datetime
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
+
+from .models import Challenge, ChallengeDoneByTeam, Team, Game
 
 class GameConsumer(WebsocketConsumer):
 
     def connect(self):
-        self.room_group_name = 'test'
+        print("Connect")
+        #print("self.scope")
+        self.room_group_name = self.scope['url_route']['kwargs']['game_id']
         # Join room group
         async_to_sync(self.channel_layer.group_add)(
             self.room_group_name,
             self.channel_name
         )
-        
-        self.accept()
-        
-        # self.send(text_data=json.dumps({
-        #     "type": "connection_established",
-        #     "message": "You are now connected!"
-        # }))
 
-    def receive(self, text_data):
-        text_data_json = json.loads(text_data)
-        message = text_data_json['message']
-        
-        async_to_sync(self.channel_layer.group_send)(
+        self.accept()
+
+    def disconnect(self, code):
+        print("Disconnected")
+        # Join room group
+        async_to_sync(self.channel_layer.group_discard)(
             self.room_group_name,
-            {
-                'type': 'chat.message',
-                'message': message
-            }
+            self.channel_name
         )
 
-    def chat_message(self, event):
-        message = event['message']
+    def receive(self, text_data):
+        response = json.loads(text_data)
+        
+        event = response.get("event", None)
+        send_team = response.get('send_team', None)
+        game_id = response.get('game_id', None)
+        
+        if event == 'GET-CHALLENGE':
+            
+            all_challenges = Challenge.objects.all()
+            random_challenge = random.choice(list(all_challenges))
+
+            self.send(text_data=json.dumps({
+                "event": event,
+                "send_team": send_team,
+                "challenge_pk": random_challenge.pk,
+                "challenge_name": random_challenge.name,
+                "challenge_text": random_challenge.challenge_text,
+                "challenge_reward": random_challenge.reward,
+            }))
+        
+        elif event == 'CHALLENGE-SUCCESSFUL':
+            challenge_pk = response.get("challenge_pk", None)
+            challenge = Challenge.objects.get(pk=challenge_pk)
+            game = Game.objects.get(game_id = game_id)
+            team = Team.objects.get(game = game, team_name = send_team)
+            print(team)
+            team.coins = team.coins + challenge.reward
+            team.save()
+            
+            ChallengeDoneByTeam.objects.create(challenge = challenge,
+                                               team = team,
+                                               successful = True,
+                                               timestamp = datetime.now())
+
+            self.send(text_data=json.dumps({
+                "event": event,
+                "send_team": send_team,
+            }))
+        
+ 
+        
+
+    def start_game(self, response):
+        game_id = response["game_id"]
+        event = response["event"]
 
         self.send(text_data=json.dumps({
-            'type': 'chat',
-            'message': message
+            "team_name": game_id,
+            "event": event,
         }))
-        # self.send(text_data=json.dumps({
-        #     'type': 'chat',
-        #     'message': message
-        # }))
-    # 
 
 class WaitingConsumer(WebsocketConsumer):
 

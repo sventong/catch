@@ -28,7 +28,7 @@ class Team(models.Model):
     game_master = models.BooleanField()
     role = models.CharField(max_length=20, choices = ROLE_CHOICES, null=True)
     points = models.IntegerField(null=True)
-    money = models.IntegerField(null=True)
+    coins = models.IntegerField(null=True, default=500)
     jail_time = models.IntegerField(null=True)
     jail_time_start = models.DateTimeField(null=True)
 
@@ -45,6 +45,7 @@ class Challenge(models.Model):
 
 class TransportType(models.Model):
     name = models.CharField(max_length=20)
+    javascript_id = models.CharField(max_length=20, default="")
     cost_per_station = models.IntegerField()
 
 class ChallengeDoneByTeam(models.Model):

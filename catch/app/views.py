@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.views.generic.base import TemplateView
 
 from .forms import JoinGameForm, CreateGameForm
-from .models import Game, Team, ROLE_CHOICES
+from .models import Game, Team, TransportType, ROLE_CHOICES
 from .utils import random_game_id
 from django.conf import settings
 
@@ -61,10 +61,10 @@ def game(request, game_id=""):
 
         # runner_team = Team.objects.filter(pk=runner_team_pk)
     
-    jail_time_finish = ""
+    formatted_jail_time = ""
     if current_team.role == "CHASER":
         jail_time_finish = current_team.jail_time_start + timedelta(hours=2, minutes=15)
-        formatted = jail_time_finish.strftime("%Y-%m-%dT%H:%M:%S")
+        formatted_jail_time = jail_time_finish.strftime("%Y-%m-%dT%H:%M:%S")
 
     runner_team = Team.objects.filter(game = current_game, role="RUNNER").first()
 
@@ -72,7 +72,8 @@ def game(request, game_id=""):
         "game": current_game,
         "curr_team": current_team,
         "all_teams": all_teams,
-        "jail_time_finish": formatted
+        "jail_time_finish": formatted_jail_time,
+        "transport_types": TransportType.objects.all()
     }
 
     request.session['current_game'] = game_id
