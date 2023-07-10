@@ -66,6 +66,7 @@ def game(request, game_id=""):
         jail_time_finish = current_team.jail_time_start + timedelta(hours=2, minutes=5)
         formatted_jail_time = jail_time_finish.strftime("%Y-%m-%dT%H:%M:%S")
 
+
     runner_team = Team.objects.filter(game = current_game, role="RUNNER").first()
 
     context = {
@@ -209,7 +210,6 @@ def confirm_catch(request):
     all_teams_pk = Team.objects.filter(game = current_game).values_list("pk", flat=True)
 
     next_team = get_next_element_in_cycle(catched_team.pk, list(all_teams_pk))
-    print(next_team)
 
     catched_team.role = 'CHASER'
     next_team.role = 'RUNNER'
