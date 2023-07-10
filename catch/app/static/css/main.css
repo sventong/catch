@@ -105,3 +105,16 @@ body,html {
 .button:hover {
     box-shadow: -6px 6px 0 black;
 }
+
+#confirm-catch {
+    display: none;
+}
+
+.confirm-catch-box {
+    display: flex;
+}
+
+.half {
+    width: 50%
+}
+

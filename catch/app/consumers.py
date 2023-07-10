@@ -54,7 +54,7 @@ class GameConsumer(WebsocketConsumer):
             challenge = Challenge.objects.get(pk=challenge_pk)
             game = Game.objects.get(game_id = game_id)
             team = Team.objects.get(game = game, team_name = send_team)
-            print(team)
+
             team.coins = team.coins + challenge.reward
             team.save()
             
@@ -66,17 +66,26 @@ class GameConsumer(WebsocketConsumer):
             self.send(text_data=json.dumps({
                 "event": event,
                 "send_team": send_team,
+                "send_team_coins": team.coins
             }))
-        
- 
-        
 
-    def start_game(self, response):
-        game_id = response["game_id"]
+        elif event == 'CATCH':
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'catch',
+                    'event': event,
+                    'send_team': send_team
+                }
+            )
+        
+    def catch(self, response):
+        
         event = response["event"]
-
+        send_team = response["send_team"]
+        
         self.send(text_data=json.dumps({
-            "team_name": game_id,
+            "send_team": send_team,
             "event": event,
         }))
 
@@ -106,14 +115,14 @@ class WaitingConsumer(WebsocketConsumer):
     def receive(self, text_data):
         response = json.loads(text_data)
         event = response.get("event", None)
-        team_name = response.get('team_name', None)
+        send_team = response.get('send_team', None)
         
         if event == 'START':
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
                 {
                     'type': 'add_team',
-                    'team_name': team_name,
+                    'send_team': send_team,
                     'event': 'NEWTEAM'
                 }
             )
@@ -126,18 +135,18 @@ class WaitingConsumer(WebsocketConsumer):
                 {
                     'type': 'start_game',
                     'game_id': game_id,
-                    'event': 'START-GAME'
+                    'event': event
                 }
             )
         
     
     def add_team(self, response):
         
-        team_name = response["team_name"]
+        send_team = response["send_team"]
         event = response["event"]
         
         self.send(text_data=json.dumps({
-            "team_name": team_name,
+            "send_team": send_team,
             "event": event,
         }))
 

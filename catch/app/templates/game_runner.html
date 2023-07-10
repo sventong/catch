@@ -12,11 +12,32 @@
             Timer
         </div>
 
-        <div class="col-6 text-center">
-            {{curr_team.money}} Coins
+        <div class="col-6 text-center" id="coins">
+            {{curr_team.coins}} Coins
         </div>
     </div>
     
+    <div class="row" id="confirm-catch">
+        <div class="col-10 offset-1 transport-types">
+            <div class="description">You have been catched. Do you confirm the catch? If you do, your Jail Time will start.</div>
+            <div class="box confirm-catch-box">
+                <div class="half">
+                    <a href="{% url 'confirm_catch' %}">
+                        <button type="button" class="button btn-lg" id="catch-success">
+                            <div class="">I Got Catched :(</div>
+                        </button>
+                    </a>
+                </div>
+                <div class="half">
+                    <button type="button" class="button btn-lg" id="catch-deny">
+                        <div class="">False Alert</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <div class="row draw-challenge" id="challenge">
         <div class="col-10 offset-1">
             <div id="draw-challenge-box">
@@ -41,18 +62,36 @@
     <div class="row public-transport">
         <div class="col-10 offset-1 transport-types">
             <div class="description">Use public transport to get around.</div>
-                <div class="box">
-                
-                {% for tt in transport_types %}
-                    <div class="text-center">
-                        <button type="button" class="button btn-lg" id="{{tt.name}}-button">
-                            {{tt.name}}
-                            <div class="description-small text-right">{{tt.cost_per_station}}/station</div>
-                        </button>
-                    </div>
-                {% endfor %}
+            <div class="box">
+            {% for tt in transport_types %}
+                <div class="text-center">
+                    <button type="button" class="button btn-lg" id="{{tt.name}}-button">
+                        {{tt.name}}
+                        <div class="description-small text-right">{{tt.cost_per_station}}/station</div>
+                    </button>
+                </div>
+            {% endfor %}
             </div>
+        </div>
+    </div>
 
+    <div class="row" id="confirm-catch">
+        <div class="col-10 offset-1 transport-types">
+            <div class="description">You have been catched. Do you confirm the catch? If you do, your Jail Time will start.</div>
+            <div class="box confirm-catch-box">
+                <div class="half">
+                    <a href="{% url 'confirm_catch' %}">
+                        <button type="button" class="button btn-lg" id="catch-success">
+                            <div class="">I Got Catched :(</div>
+                        </button>
+                    </a>
+                </div>
+                <div class="half">
+                    <button type="button" class="button btn-lg" id="catch-deny">
+                        <div class="">False Alert</div>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -62,7 +101,7 @@
 
 {% load static %}
 <script type="text/javascript"> 
-        
+    
     function connect() {
         
         let game_id = '{{game.game_id}}'
@@ -89,6 +128,7 @@
     
             let event = data['event']
             let send_team = data['send_team']
+            let coins = data['send_team_coins']
             let challenge_name = data['challenge_name']
             let challenge_text = data['challenge_text']
             let challenge_reward = data['challenge_reward']
@@ -121,8 +161,15 @@
 
                 let challenge_box_div = document.getElementById('challenge-box')
                 challenge_box_div.style.display='none'
+
+                document.getElementById("coins").innerHTML = `${coins} Coins`;
+            
+            } else if (event === 'CATCH') {
+                let confirm_catch_div = document.getElementById('confirm-catch')
+                confirm_catch_div.style.display='block'
             }
         };
+        
 
 
         document.getElementById('draw-a-challenge').onclick = function() {
@@ -131,7 +178,7 @@
                 "game_id": game_id,
                 "send_team": curr_team_name
             }))
-        }
+        };
 
         document.getElementById('challenge-successful').onclick = function() {
             waitSocket.send(JSON.stringify({
@@ -140,8 +187,16 @@
                 "send_team": curr_team_name,
                 "challenge_pk": challenge_pk
             }))
-        }
-    }
+        };
+        
+        document.getElementById('catch-deny').onclick = function() {
+            waitSocket.send(JSON.stringify({
+                "event": "CATCH-DENY",
+                "game_id": game_id,
+                "send_team": curr_team_name
+            }))
+        };
+    };
 
     connect();
 </script> 

@@ -77,7 +77,7 @@
             console.log("WebSockets connection created.");
             waitSocket.send(JSON.stringify({
                 "event": "START",
-                "team_name": curr_team_name
+                "send_team": curr_team_name
             }))
         };
     
@@ -92,7 +92,7 @@
             let data = JSON.parse(e.data)
             console.log('Data:', data)
     
-            let team_name = data['team_name']
+            let team_name = data['send_team']
             let event = data['event']
             if (event === 'NEWTEAM' && curr_team_name !== team_name){
                 let teams_div = document.getElementById('teams')
@@ -107,7 +107,6 @@
                 }, 2000);
             }
         };
-
 
         document.getElementById('start-game-button').onclick = function() {
             waitSocket.send(JSON.stringify({

@@ -6,31 +6,14 @@
 
 <div class="container h-100 align-items-center text-center">
     <h1> CHASE </h1>
-    (Track - button)
-    <p id="jail_timer"></p>
-
-    {{jail_time_finish}}
-
-    Challenges cannot be duplicate in one game. We have to be able to track them
-
-    Money
-
-    Chat function, where you can post your completed challenges, if there is an image needed for proof
-
-    <div class="row">
-        <div class="col-md-12 text-center">
-            {% comment %} <a href="{% url 'game' %}">
-                <button type="submit" class="btn btn-dark btn-lg">CATCH !</button>
-            </a> {% endcomment %}
-        </div>
+    <div class="box">
+        <div id="jail_timer"></div>
     </div>
 
 
     <div class="row">
-        <div class="col-md-12 text-center">
-            <a href="{% url 'game' game_id=game.game_id  %}"> 
-                <button type="submit" class="btn btn-dark btn-lg" id="catch">CATCH !</button>
-            </a>
+        <div class="col-md-12 text-center" id="catch">
+            <button type="submit" class="button btn-lg" id="catch-button">CATCH !</button>
         </div>
     </div>
 
@@ -65,25 +48,27 @@
             let data = JSON.parse(e.data)
             console.log('Data:', data)
     
-            let team_name = data['team_name']
+            let send_team = data['send_team']
             let event = data['event']
             if (event === 'NEWTEAM' && curr_team_name !== team_name){
                 let teams_div = document.getElementById('teams')
     
                 teams_div.insertAdjacentHTML('beforeend', 
                                              `<div>
-                                                <th>${team_name}</th>
+                                                <th>${send_team}</th>
                                              </div>`)
-            } else if (event === 'START-GAME') {
-                document.getElementById("start-game-button").click();
+            } else if (event === 'CATCH' && curr_team_name === send_team) {
+                let catch_div = document.getElementById('catch')
+                catch_div.style.display = 'none'
             }
         };
 
 
-        document.getElementById('catch').onclick = function() {
+        document.getElementById('catch-button').onclick = function() {
             waitSocket.send(JSON.stringify({
                 "event": "CATCH",
-                "game_id": game_id
+                "game_id": game_id,
+                "send_team": curr_team_name
             }))
         }
     }
