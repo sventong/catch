@@ -5,7 +5,9 @@
 
 
 <div class="container h-100 align-items-center text-center">
-    <h2> Runner </h2>
+    <h1> Runner </h1>
+    <h3> {{curr_team.team_name}} </h3>
+
 
     <div class="row">
         <div class="col-6 text-center">
@@ -22,11 +24,14 @@
             <div class="description">You have been catched. Do you confirm the catch? If you do, your Jail Time will start.</div>
             <div class="box confirm-catch-box">
                 <div class="half">
-                    <a href="{% url 'confirm_catch' %}">
-                        <button type="button" class="button btn-lg" id="catch-success">
-                            <div class="">I Got Catched :(</div>
-                        </button>
-                    </a>
+                    <form>
+                        <input type="hidden" id="title" name="action" value="confirm-catch"/>
+                        <a href="{% url 'game' game_id=game.game_id %}">
+                            <button type="submit" class="button btn-lg" id="catch-success">
+                                <div class="">I Got Catched :(</div>
+                            </button>
+                        </a>
+                    </form>
                 </div>
                 <div class="half">
                     <button type="button" class="button btn-lg" id="catch-deny">
@@ -75,23 +80,11 @@
         </div>
     </div>
 
-    <div class="row" id="confirm-catch">
-        <div class="col-10 offset-1 transport-types">
-            <div class="description">You have been catched. Do you confirm the catch? If you do, your Jail Time will start.</div>
-            <div class="box confirm-catch-box">
-                <div class="half">
-                    <a href="{% url 'confirm_catch' %}">
-                        <button type="button" class="button btn-lg" id="catch-success">
-                            <div class="">I Got Catched :(</div>
-                        </button>
-                    </a>
-                </div>
-                <div class="half">
-                    <button type="button" class="button btn-lg" id="catch-deny">
-                        <div class="">False Alert</div>
-                    </button>
-                </div>
-            </div>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <a href="{% url 'game' game_id=game.game_id %}">
+                <button type="hidden" class="btn btn-dark btn-lg secret-btn" id="catch-confirmed">Catch Confirmed</button>
+            </a>
         </div>
     </div>
 
@@ -167,6 +160,13 @@
             } else if (event === 'CATCH') {
                 let confirm_catch_div = document.getElementById('confirm-catch')
                 confirm_catch_div.style.display='block'
+            
+            } else if (event === 'CATCH-SUCCESS' && curr_team_name === send_team) {
+                document.getElementById("catch-confirmed").click();
+                
+            } else if (event === 'CATCH-DENY' && curr_team_name === send_team) {
+                let confirm_catch_div = document.getElementById('confirm-catch')
+                confirm_catch_div.style.display='none'
             }
         };
         
@@ -186,6 +186,14 @@
                 "game_id": game_id,
                 "send_team": curr_team_name,
                 "challenge_pk": challenge_pk
+            }))
+        };
+
+        document.getElementById('catch-success').onclick = function() {
+            waitSocket.send(JSON.stringify({
+                "event": "CATCH-SUCCESS",
+                "game_id": game_id,
+                "send_team": curr_team_name
             }))
         };
         

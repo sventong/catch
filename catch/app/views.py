@@ -9,7 +9,7 @@ from django.conf import settings
 
 from .forms import JoinGameForm, CreateGameForm
 from .models import Game, Team, TransportType, ROLE_CHOICES
-from .utils import random_game_id, get_next_element_in_cycle
+from .utils import random_game_id, get_next_element_in_cycle, jail_time
 
 GOOGLE_MAPS_API_KEY = settings.GOOGLE_MAPS_API_KEY
 
@@ -38,34 +38,42 @@ def index(request):
     # nr_of_teams = teams.count()
     
 
+    
+    
 
 def game(request, game_id=""):
-    
+
     current_game = Game.objects.get(game_id = request.session['current_game'])
     current_team = Team.objects.get(team_name = request.session['current_team'], game = current_game)
+    # catched_team = Team.objects.get(game = current_game, role = 'RUNNER')
+    all_teams = Team.objects.filter(game = current_game)
+    all_teams_pk = Team.objects.filter(game = current_game).values_list("pk", flat=True)
+
     state = request.session['state']
-    all_teams = Team.objects.filter(game_id = current_game)
+    formatted_jail_time = ""
     
     print(state)
-    print(current_team.game_master)
+    if state == 'waiting':
+        if current_team.game_master == True:
 
-    if current_team.game_master == True and state == 'waiting':
-        print('RUNNER wird ausgewählt')
-        Team.objects.filter(game_id = current_game).update(role="CHASER")
-        random_team = random.choice(list(all_teams))
-        Team.objects.filter(pk = random_team.pk).update(role="RUNNER")
-        Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 5)
-        
+            Team.objects.filter(game_id = current_game).update(role="CHASER")
+            random_team = random.choice(list(all_teams))
+            Team.objects.filter(pk = random_team.pk).update(role="RUNNER")
+            Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 10)
+            
+            request.session['state'] = 'init_game'
+            print(Team.objects.filter(game = current_game, role="RUNNER").first())
         request.session['state'] = 'init_game'
-        print(Team.objects.filter(game = current_game, role="RUNNER").first())
 
-        # runner_team = Team.objects.filter(pk=runner_team_pk)
+    elif state == 'init_game':
+        formatted_jail_time = jail_time(current_team)
+        request.session['state'] = 'game'
+
+    elif state == 'game':
+        print('Game')
+        
+    # runner_team = Team.objects.filter(pk=runner_team_pk)
     
-    formatted_jail_time = ""
-    if current_team.role == "CHASER":
-        jail_time_finish = current_team.jail_time_start + timedelta(hours=2, minutes=5)
-        formatted_jail_time = jail_time_finish.strftime("%Y-%m-%dT%H:%M:%S")
-
 
     runner_team = Team.objects.filter(game = current_game, role="RUNNER").first()
 
@@ -80,20 +88,17 @@ def game(request, game_id=""):
     request.session['current_game'] = game_id
     request.session['current_team'] = current_team.team_name
     
-    print(current_team)
-    print(runner_team)
+    print(current_team.team_name)
+    print(current_team.role)
+    print(runner_team.team_name)
+    print(runner_team.role)
+    
     if current_team == runner_team:
         return render(request, 'game_runner.html', context)
     else:
         return render(request, 'game_chaser.html', context)
 
 
-def map(request):
-    context = {
-        "api_key": GOOGLE_MAPS_API_KEY
-    }
-    
-    return render(request, "map.html", context)
 
 
 def create_game(request):
@@ -200,38 +205,3 @@ def join_game(request):
         }
         return render(request, 'waiting_for_teams.html', context)
     
-def confirm_catch(request):
-
-    current_game = Game.objects.get(game_id = request.session['current_game'])
-    current_team = Team.objects.get(team_name = request.session['current_team'], game = current_game)
-    catched_team = Team.objects.get(game = current_game, role = 'RUNNER')
-    all_teams = Team.objects.filter(game = current_game)
-
-    all_teams_pk = Team.objects.filter(game = current_game).values_list("pk", flat=True)
-
-    next_team = get_next_element_in_cycle(catched_team.pk, list(all_teams_pk))
-
-    catched_team.role = 'CHASER'
-    next_team.role = 'RUNNER'
-    catched_team.save()
-    next_team.save()
-    Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 5)
-
-
-    formatted_jail_time = ""
-    if current_team.role == "CHASER":
-        jail_time_finish = current_team.jail_time_start + timedelta(hours=2, minutes=5)
-        formatted_jail_time = jail_time_finish.strftime("%Y-%m-%dT%H:%M:%S")
-
-    context = {
-        "game": current_game,
-        "curr_team": current_team,
-        "all_teams": all_teams,
-        "jail_time_finish": formatted_jail_time,
-        "transport_types": TransportType.objects.all()
-    }
-
-    if current_team == next_team:
-        return render(request, 'game_runner.html', context)
-    else:
-        return render(request, 'game_chaser.html', context)

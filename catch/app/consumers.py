@@ -1,10 +1,11 @@
 import json
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 
 from .models import Challenge, ChallengeDoneByTeam, Team, Game
+from .utils import get_next_element_in_cycle
 
 class GameConsumer(WebsocketConsumer):
 
@@ -78,12 +79,81 @@ class GameConsumer(WebsocketConsumer):
                     'send_team': send_team
                 }
             )
+
+        elif event == 'CATCH-SUCCESS':
+            
+            current_game = Game.objects.get(game_id = game_id)
+            current_team = Team.objects.get(team_name = send_team, game = current_game)
+            catched_team = Team.objects.get(game = current_game, role = 'RUNNER')
+            all_teams = Team.objects.filter(game = current_game)
+            all_teams_pk = Team.objects.filter(game = current_game).values_list("pk", flat=True)
+        
+            next_team = get_next_element_in_cycle(catched_team.pk, list(all_teams_pk))
+            print(next_team)
+            Team.objects.filter(pk = catched_team.pk).update(role = 'CHASER')      
+            Team.objects.filter(pk = next_team.pk).update(role = 'RUNNER')      
+            # catched_team.role = 'CHASER'
+            # next_team.role = 'RUNNER'
+            # catched_team.save()
+            # next_team.save()
+            print(next_team.team_name)
+            print(next_team.role)
+            Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 5)
+                
+            print("catch success end")
+            
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'catch_success',
+                    'event': event,
+                    'game_id': game_id,
+                    'send_team': send_team
+                }
+            )
+
+        elif event == 'CATCH-DENY':
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'catch_deny',
+                    'event': event,
+                    'send_team': send_team
+                }
+            )
+        
+
         
     def catch(self, response):
         
         event = response["event"]
         send_team = response["send_team"]
         
+        self.send(text_data=json.dumps({
+            "send_team": send_team,
+            "event": event,
+        }))
+
+    def catch_success(self, response):
+        
+        print("catch success start")
+        event = response["event"]
+        game_id = response["game_id"]
+        send_team = response["send_team"]
+    
+        
+
+        self.send(text_data=json.dumps({
+            "send_team": send_team,
+            "game_id": game_id,
+            "event": event,
+        }))
+
+    def catch_deny(self, response):
+    
+        event = response["event"]
+        send_team = response["send_team"]
+
         self.send(text_data=json.dumps({
             "send_team": send_team,
             "event": event,
