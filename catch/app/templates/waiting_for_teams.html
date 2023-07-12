@@ -46,9 +46,13 @@
         <div class="col-md-12 text-center">
             <a href="{% url 'game' game_id=game.game_id %}">
                 {% if curr_team.game_master == True %}
-                    <button type="submit" class="btn btn-dark btn-lg" id="start-game-button">Start The Game!</button>
+                    <button type="submit" class="button btn-lg" id="start-game-button">
+                        <div class="">Start The Game!</div>
+                    </button>
                 {% else %}
-                    <button type="submit" class="btn btn-dark btn-lg secret-btn" id="start-game-button">Start The Game!</button>
+                    <button type="submit" class="button btn-lg secret-btn" id="start-game-button">
+                        <div class="">Start The Game!</div>
+                    </button>
                 {% endif %}
             </a>
         </div>
