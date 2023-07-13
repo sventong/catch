@@ -59,23 +59,26 @@ def game(request, game_id=""):
             Team.objects.filter(game_id = current_game).update(role="CHASER")
             random_team = random.choice(list(all_teams))
             Team.objects.filter(pk = random_team.pk).update(role="RUNNER")
-            Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 10)
+            Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 5)
             
             request.session['state'] = 'init_game'
-            print(Team.objects.filter(game = current_game, role="RUNNER").first())
+
         request.session['state'] = 'init_game'
 
     elif state == 'init_game':
-        formatted_jail_time = jail_time(current_team)
         request.session['state'] = 'game'
 
+
     elif state == 'game':
-        print('Game')
-        
-    # runner_team = Team.objects.filter(pk=runner_team_pk)
+        pass
     
 
+        
+    # runner_team = Team.objects.filter(pk=runner_team_pk)
+    formatted_jail_time = jail_time(current_team.pk)
+    print(formatted_jail_time)
     runner_team = Team.objects.filter(game = current_game, role="RUNNER").first()
+
 
     context = {
         "game": current_game,
@@ -87,12 +90,7 @@ def game(request, game_id=""):
 
     request.session['current_game'] = game_id
     request.session['current_team'] = current_team.team_name
-    
-    print(current_team.team_name)
-    print(current_team.role)
-    print(runner_team.team_name)
-    print(runner_team.role)
-    
+
     if current_team == runner_team:
         return render(request, 'game_runner.html', context)
     else:

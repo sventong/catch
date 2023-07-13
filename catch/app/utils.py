@@ -23,9 +23,10 @@ def get_next_element_in_cycle(current_element, all_elements):
 
     return next_element
 
-def jail_time(current_team):
-    if current_team.role == "CHASER":
-        jail_time_finish = current_team.jail_time_start + timedelta(hours=2, minutes=5)
+def jail_time(team_pk):
+    team = Team.objects.get(pk = team_pk)
+    if team.role == "CHASER":
+        jail_time_finish = team.jail_time_start + timedelta(hours=2, minutes=team.jail_time)
         formatted_jail_time = jail_time_finish.strftime("%Y-%m-%dT%H:%M:%S")
 
         return formatted_jail_time

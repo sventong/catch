@@ -161,6 +161,25 @@ class GameConsumer(WebsocketConsumer):
 
 class WaitingConsumer(WebsocketConsumer):
 
+    def add_team(self, response):
+        
+        send_team = response["send_team"]
+        event = response["event"]
+        
+        self.send(text_data=json.dumps({
+            "send_team": send_team,
+            "event": event,
+        }))
+
+    def start_game(self, response):
+        game_id = response["game_id"]
+        event = response["event"]
+
+        self.send(text_data=json.dumps({
+            "team_name": game_id,
+            "event": event,
+        }))
+
     def connect(self):
         print("Connect")
         #print("self.scope")
@@ -210,21 +229,4 @@ class WaitingConsumer(WebsocketConsumer):
             )
         
     
-    def add_team(self, response):
-        
-        send_team = response["send_team"]
-        event = response["event"]
-        
-        self.send(text_data=json.dumps({
-            "send_team": send_team,
-            "event": event,
-        }))
-
-    def start_game(self, response):
-        game_id = response["game_id"]
-        event = response["event"]
-
-        self.send(text_data=json.dumps({
-            "team_name": game_id,
-            "event": event,
-        }))
+    
