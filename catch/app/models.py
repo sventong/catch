@@ -27,10 +27,10 @@ class Team(models.Model):
     team_name = models.CharField(max_length=30)
     game_master = models.BooleanField()
     role = models.CharField(max_length=20, choices = ROLE_CHOICES, null=True)
-    points = models.IntegerField(null=True)
+    points = models.IntegerField(null=True, default=0)
     coins = models.IntegerField(null=True, default=500)
-    jail_time = models.IntegerField(null=True)
-    jail_time_start = models.DateTimeField(null=True)
+    jail_time = models.IntegerField(null=True, blank=True)
+    jail_time_start = models.DateTimeField(null=True, blank=True)
 
     # TODO Solo or Team
 

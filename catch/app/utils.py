@@ -1,6 +1,6 @@
 import random
 import string
-from datetime import timedelta
+from datetime import datetime, timedelta
 from .models import Game, Team
 
 
@@ -23,12 +23,19 @@ def get_next_element_in_cycle(current_element, all_elements):
 
     return next_element
 
-def jail_time(team_pk):
+def jail_time_end(team_pk):
     team = Team.objects.get(pk = team_pk)
-    if team.role == "CHASER":
-        jail_time_finish = team.jail_time_start + timedelta(hours=2, minutes=team.jail_time)
-        formatted_jail_time = jail_time_finish.strftime("%Y-%m-%dT%H:%M:%S")
 
-        return formatted_jail_time
+    if team.jail_time_start:
+        jail_time_finish = team.jail_time_start + timedelta(hours=2, minutes=team.jail_time)
+        now = datetime.now() + timedelta(hours=2)
+        print(now)
+        print(jail_time_finish.replace(tzinfo=None))
+        if jail_time_finish.replace(tzinfo=None) < now:
+            return ""
+        else: 
+            formatted_jail_time = jail_time_finish.strftime("%Y-%m-%dT%H:%M:%S")
+            return formatted_jail_time
+        
     else:
         return ""

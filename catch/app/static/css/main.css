@@ -56,7 +56,6 @@ body,html {
 
 .challenge-box {
     text-align: left;
-    display: none;
 }
 
 #challenge-name {
@@ -83,9 +82,9 @@ body,html {
     text-align: right;
 }
 
-#accept-discard-challenge {
+/* #accept-discard-challenge {
     display: none;
-}
+} */
 
 /* Button */
 .button {
@@ -106,9 +105,9 @@ body,html {
     box-shadow: -6px 6px 0 black;
 }
 
-#confirm-catch {
+/* #confirm-catch {
     display: none;
-}
+} */
 
 .confirm-catch-box {
     display: flex;

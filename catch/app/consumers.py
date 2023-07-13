@@ -5,7 +5,7 @@ from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 
 from .models import Challenge, ChallengeDoneByTeam, Team, Game
-from .utils import get_next_element_in_cycle
+from .utils import get_next_element_in_cycle, jail_time_end
 
 class GameConsumer(WebsocketConsumer):
 
@@ -35,7 +35,7 @@ class GameConsumer(WebsocketConsumer):
         event = response.get("event", None)
         send_team = response.get('send_team', None)
         game_id = response.get('game_id', None)
-        
+
         if event == 'GET-CHALLENGE':
             
             all_challenges = Challenge.objects.all()
@@ -51,6 +51,7 @@ class GameConsumer(WebsocketConsumer):
             }))
         
         elif event == 'CHALLENGE-SUCCESSFUL':
+            
             challenge_pk = response.get("challenge_pk", None)
             challenge = Challenge.objects.get(pk=challenge_pk)
             game = Game.objects.get(game_id = game_id)
@@ -70,6 +71,21 @@ class GameConsumer(WebsocketConsumer):
                 "send_team_coins": team.coins
             }))
 
+        elif event == 'CHALLENGE-CANCEL':
+            challenge_pk = response.get("challenge_pk", None)
+            game = Game.objects.get(game_id = game_id)
+            Team.objects.filter(game = game, team_name = send_team).update(jail_time_start=datetime.now(), jail_time = 1)
+            team = Team.objects.get(team_name = send_team)
+            formatted_jail_time = jail_time_end(team.pk)
+            print(formatted_jail_time)
+            self.send(text_data=json.dumps({
+                "event": event,
+                "send_team": send_team,
+                "jail_time_finish": formatted_jail_time,
+                "challenge_pk": challenge_pk
+            }))
+
+
         elif event == 'CATCH':
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
@@ -81,7 +97,7 @@ class GameConsumer(WebsocketConsumer):
             )
 
         elif event == 'CATCH-SUCCESS':
-            
+            print("Catchsuccessconsumer")
             current_game = Game.objects.get(game_id = game_id)
             current_team = Team.objects.get(team_name = send_team, game = current_game)
             catched_team = Team.objects.get(game = current_game, role = 'RUNNER')
@@ -121,7 +137,10 @@ class GameConsumer(WebsocketConsumer):
                     'send_team': send_team
                 }
             )
-        
+
+        elif event == 'PENALTY-OVER':
+            game = Game.objects.get(game_id = game_id)
+            Team.objects.filter(game = game, team_name = send_team).update(jail_time_start='', jail_time = '')
 
         
     def catch(self, response):

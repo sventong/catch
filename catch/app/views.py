@@ -9,7 +9,7 @@ from django.conf import settings
 
 from .forms import JoinGameForm, CreateGameForm
 from .models import Game, Team, TransportType, ROLE_CHOICES
-from .utils import random_game_id, get_next_element_in_cycle, jail_time
+from .utils import random_game_id, get_next_element_in_cycle, jail_time_end
 
 GOOGLE_MAPS_API_KEY = settings.GOOGLE_MAPS_API_KEY
 
@@ -75,7 +75,7 @@ def game(request, game_id=""):
 
         
     # runner_team = Team.objects.filter(pk=runner_team_pk)
-    formatted_jail_time = jail_time(current_team.pk)
+    formatted_jail_time = jail_time_end(current_team.pk)
     print(formatted_jail_time)
     runner_team = Team.objects.filter(game = current_game, role="RUNNER").first()
 

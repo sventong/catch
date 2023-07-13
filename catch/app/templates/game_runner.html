@@ -5,11 +5,12 @@
 
 
 <div class="container h-100 align-items-center text-center">
+    
     <h1> Runner </h1>
     <h3> {{curr_team.team_name}} </h3>
 
 
-    <div class="row">
+    <div class="row head-bar">
         <div class="col-6 text-center">
             Timer
         </div>
@@ -19,10 +20,10 @@
         </div>
     </div>
     
-    <div class="row" id="confirm-catch">
+    <div class="row d-none" id="confirm-catch">
         <div class="col-10 offset-1 transport-types">
             <div class="description">You have been catched. Do you confirm the catch? If you do, your Jail Time will start.</div>
-            <div class="box confirm-catch-box">
+            <div class="box confirm-catch-box d-flex">
                 <div class="half">
                     <form>
                         <input type="hidden" id="title" name="action" value="confirm-catch"/>
@@ -42,9 +43,17 @@
         </div>
     </div>
 
+    <div class="row d-none" id="jail_timer">
+        <div class="col-10 offset-1 ">
+            <div class="description">Cancelling challenges leads to a transportation penalty. You are not allowed to use public transport until the end of the timer.</div>
+
+            <div class="box" id="timer"></div>
+        </div>
+    </div>
 
     <div class="row draw-challenge" id="challenge">
         <div class="col-10 offset-1">
+            
             <div id="draw-challenge-box">
                 <div class="description">You have to complete challenges in order to get Transportation Coins.</div>
 
@@ -55,16 +64,18 @@
                 </div>
             </div>
             
-            <div class="challenge-box" id="challenge-box">
+            <div class="challenge-box d-none" id="challenge-box">
                 <div class="box" id="accept-discard-challenge">
+                    <div id="challenge-cancel">X</div>
                     <button type="button" class="button btn-lg" id="challenge-successful">Challenge Successful</button>
                 </div>
             </div>
-            
+
         </div>
     </div>
 
-    <div class="row public-transport">
+
+    <div class="row" id="public-transport">
         <div class="col-10 offset-1 transport-types">
             <div class="description">Use public transport to get around.</div>
             <div class="box">
@@ -77,14 +88,6 @@
                 </div>
             {% endfor %}
             </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-12 text-center">
-            <a href="{% url 'game' game_id=game.game_id %}">
-                <button type="hidden" class="btn btn-dark btn-lg secret-btn" id="catch-confirmed">Catch Confirmed</button>
-            </a>
         </div>
     </div>
 
@@ -125,27 +128,31 @@
             let challenge_name = data['challenge_name']
             let challenge_text = data['challenge_text']
             let challenge_reward = data['challenge_reward']
+            let jail_time_finish = data['jail_time_finish']
+
+            // Global variables needed on for view
             challenge_pk = data['challenge_pk']
             
             if (event === 'GET-CHALLENGE' && send_team == curr_team_name){
                 let draw_challenge_div = document.getElementById('draw-challenge-box')
-                draw_challenge_div.style.display='none'
+                draw_challenge_div.classList.add('d-none')
                 
                 let challenge_box_div = document.getElementById('challenge-box')
-                challenge_box_div.style.display='block'
+                challenge_box_div.classList.remove('d-none')
                 
                 let accept_discard_challenge_div = document.getElementById('accept-discard-challenge')
+                accept_discard_challenge_div.classList.remove('d-none');
+                accept_discard_challenge_div.classList.add('d-block');
                 accept_discard_challenge_div.insertAdjacentHTML('afterbegin', `<div id="challenge-reward">${challenge_reward} Transport Tokens</div>`)
                 accept_discard_challenge_div.insertAdjacentHTML('afterbegin', `<div id="challenge-text">${challenge_text}</div>`)
                 accept_discard_challenge_div.insertAdjacentHTML('afterbegin', `<div id="challenge-name">${challenge_name}</div>
-                <div id="challenge-cancel">X</div>`)
+                `)
 
-                accept_discard_challenge_div.style.display='block'
             
             } else if (event === 'CHALLENGE-SUCCESSFUL' && send_team == curr_team_name) {
                 console.log('CHALLENGE-SUCCESSFUL')
                 let draw_challenge_div = document.getElementById('draw-challenge-box')
-                draw_challenge_div.style.display='block'
+                draw_challenge_div.classList.remove('d-none')
 
                 document.getElementById('challenge-reward').remove()
                 document.getElementById('challenge-text').remove()
@@ -153,20 +160,31 @@
                 document.getElementById('challenge-cancel').remove()
 
                 let challenge_box_div = document.getElementById('challenge-box')
-                challenge_box_div.style.display='none'
+                challenge_box_div.classList.add('d-none')
 
                 document.getElementById("coins").innerHTML = `${coins} Coins`;
             
+            } else if (event === 'CHALLENGE-CANCEL') {
+                let jail_time_div = document.getElementById("jail_timer")
+                jail_time_div.classList.remove('d-none')
+                console.log(jail_time_finish)
+                jailtime(jail_time_finish)
+
+                let challenge_div = document.getElementById("challenge")
+                challenge_div.classList.add('d-none')
+                let public_transport_div = document.getElementById("public-transport");
+                public_transport_div.classList.add('d-none');
+                
             } else if (event === 'CATCH') {
                 let confirm_catch_div = document.getElementById('confirm-catch')
-                confirm_catch_div.style.display='block'
+                confirm_catch_div.classList.remove('d-none')
             
             } else if (event === 'CATCH-SUCCESS' && curr_team_name === send_team) {
                 document.getElementById("catch-confirmed").click();
-                
+            
             } else if (event === 'CATCH-DENY' && curr_team_name === send_team) {
                 let confirm_catch_div = document.getElementById('confirm-catch')
-                confirm_catch_div.style.display='none'
+                confirm_catch_div.classList.add('d-none')
             }
         };
         
@@ -189,6 +207,18 @@
             }))
         };
 
+        document.getElementById('challenge-cancel').onclick = function() {
+            waitSocket.send(JSON.stringify({
+                "event": "CHALLENGE-CANCEL",
+                "game_id": game_id,
+                "send_team": curr_team_name,
+                "challenge_pk": challenge_pk
+            }))
+
+            let challenge_box_div = document.getElementById("challenge-box")
+            challenge_box_div.classList.add('d-none')
+        };
+
         document.getElementById('catch-success').onclick = function() {
             waitSocket.send(JSON.stringify({
                 "event": "CATCH-SUCCESS",
@@ -206,7 +236,65 @@
         };
     };
 
+    function pad(num) {
+        num = num.toString();
+        while (num.length < 2) num = "0" + num;
+        return num;
+    }
+
+    function jailtime(jail_time_finish = '{{jail_time_finish}}') {
+        
+        var countDownDate = new Date(jail_time_finish).getTime();
+
+        // Update the count down every 1 second
+        var x = setInterval(function() {
+
+        // Get today's date and time
+            var now = new Date().getTime();
+            
+        // Find the distance between now and the count down date
+            var distance = countDownDate - now;
+            console.log(distance)
+            
+        // Time calculations for days, hours, minutes and seconds
+            var minutes = pad(Math.floor(distance / (1000 * 60)));
+            var seconds = pad(Math.floor((distance % (1000 * 60)) / 1000));
+            
+        // Output the result in an element with id="demo"
+            document.getElementById("timer").innerHTML = minutes + ":" + seconds;
+            
+        // If the count down is over, write some text 
+            if (distance < 0) {
+                clearInterval(x);
+                document.getElementById("timer").innerHTML = "Penalty time over! You can use public transport again";
+
+                let challenge_div = document.getElementById("challenge")
+                challenge_div.classList.remove('d-none')
+                let draw_challenge_box_div = document.getElementById("draw-challenge-box")
+                draw_challenge_box_div.classList.remove('d-none')
+                let public_transport_div = document.getElementById("public-transport")
+                public_transport_div.classList.remove('d-none')
+
+            }
+        }, 1000);
+    }
+    
     connect();
+    
+    //Jail Time Logic
+    var jail_time_finish = '{{jail_time_finish}}' 
+
+    if (jail_time_finish != '') {
+        let draw_challenge_box_div = document.getElementById("draw-challenge-box");
+        draw_challenge_box_div.classList.add('d-none');
+        let public_transport_div = document.getElementById("public-transport");
+        public_transport_div.classList.add('d-none');
+
+        let jail_time_div = document.getElementById("jail_timer");
+        jail_time_div.classList.remove('d-none');
+        jailtime(jail_time_finish)
+    }
+
 </script> 
 
 {% endblock content %}
