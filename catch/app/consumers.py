@@ -75,7 +75,7 @@ class GameConsumer(WebsocketConsumer):
             challenge_pk = response.get("challenge_pk", None)
             game = Game.objects.get(game_id = game_id)
             Team.objects.filter(game = game, team_name = send_team).update(jail_time_start=datetime.now(), jail_time = 1)
-            team = Team.objects.get(team_name = send_team)
+            team = Team.objects.get(game = game, team_name = send_team)
             formatted_jail_time = jail_time_end(team.pk)
             print(formatted_jail_time)
             self.send(text_data=json.dumps({

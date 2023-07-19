@@ -185,7 +185,6 @@
             } else if (event === 'CHALLENGE-CANCEL') {
                 let jail_time_div = document.getElementById("jail_timer")
                 jail_time_div.classList.remove('d-none')
-                console.log(jail_time_finish)
                 jailtime(jail_time_finish)
 
                 let challenge_div = document.getElementById("challenge")
@@ -242,6 +241,12 @@
 
             let challenge_box_div = document.getElementById("challenge-box")
             challenge_box_div.classList.add('d-none')
+            document.getElementById("draw-challenge-box").classList.remove('d-none')
+
+            document.getElementById('challenge-reward').remove()
+            document.getElementById('challenge-text').remove()
+            document.getElementById('challenge-name').remove()
+            
         };
 
         document.getElementById('catch-success').onclick = function() {
