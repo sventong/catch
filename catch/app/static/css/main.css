@@ -105,6 +105,8 @@ body,html {
     box-shadow: -6px 6px 0 black;
 }
 
+
+
 /* #confirm-catch {
     display: none;
 } */
@@ -116,3 +118,44 @@ body,html {
 .half {
     width: 50%
 }
+
+/* .transport-stops-btn {
+    height: 0;
+    width: 10%;
+} */
+
+.transport-stops-value {
+    font-size: large;
+    margin-top: auto;
+    margin-bottom: auto;
+    min-width: 50px;
+}
+
+.square {
+    padding: 0;
+    text-align: center;
+    width: 10vw;
+    height: 10vw;
+    min-width: 40px;
+    max-width: 60px;
+    min-height: 40px;
+    max-height: 60px;
+}
+
+.transport-stops-counter {
+    margin: 0px;
+}
+
+.hop-on {
+    background-color: greenyellow;
+    width: 60%;
+    margin-top: 0px;
+}
+
+/* .transportation {
+    margin-bottom: 50px;
+} */
+
+/* .transportation:last-child {
+    margin-bottom: 0px;
+} */

@@ -81,16 +81,16 @@
             <div class="box">
             {% for tt in transport_types %}
                 <div class="text-center transportation">
-                    <button onclick="transport_dropdown({{tt.pk}})" type="button" class="button btn-lg transport-btn" id="{{tt.pk}} ">
+                    <button onclick="transport_dropdown({{tt.pk}})" type="button" class="button btn-lg transport-btn" id="transport-type-{{tt.pk}} ">
                         {{tt.name}}
                         <div class="description-small text-right">{{tt.cost_per_station}}/station</div>
                     </button>
                     
                     <div class="transport-stops-counter d-none" id="transport-stops-counter-{{tt.pk}}" >
                         <div class="row justify-content-center align-middle">
-                            <button type="button" class="button square" id="stops-minus"> - </button>
-                            <div class="transport-stops-value" id="{{tt.pk}}transport-stops-value"> 1 </div>
-                            <button type="button" class="button square" id="stops-plus"> + </button>
+                            <button onclick="minus({{tt.pk}})" type="button" class="button square"> - </button>
+                            <div class="transport-stops-value" id="transport-stops-value-{{tt.pk}}"> 1 </div>
+                            <button onclick="plus({{tt.pk}})" type="button" class="button square"> + </button>
                         </div>
                     
                         <button type="button" class="button hop-on" id="{{tt.pk}}-hop-on"> Ride! </button>
@@ -337,6 +337,19 @@
         }
     }
     
+    function minus(id) {
+        let stops_value_div = document.getElementById(`transport-stops-value-${id}`)
+        curr_value = Number(stops_value_div.innerHTML);
+        if (curr_value != 0) {
+            stops_value_div.innerHTML = curr_value - 1
+        }
+    }
+
+    function plus(id) {
+        let stops_value_div = document.getElementById(`transport-stops-value-${id}`)
+        curr_value = Number(stops_value_div.innerHTML);
+        stops_value_div.innerHTML = curr_value + 1
+    }
 
 
     connect();
