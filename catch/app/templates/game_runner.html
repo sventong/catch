@@ -80,13 +80,26 @@
             <div class="description">Use public transport to get around.</div>
             <div class="box">
             {% for tt in transport_types %}
-                <div class="text-center">
-                    <button type="button" class="button btn-lg" id="{{tt.name}}-button">
+                <div class="text-center transportation">
+                    <button onclick="transport_dropdown({{tt.pk}})" type="button" class="button btn-lg transport-btn" id="{{tt.pk}} ">
                         {{tt.name}}
                         <div class="description-small text-right">{{tt.cost_per_station}}/station</div>
                     </button>
+                    
+                    <div class="transport-stops-counter d-none" id="transport-stops-counter-{{tt.pk}}" >
+                        <div class="row justify-content-center align-middle">
+                            <button type="button" class="button square" id="stops-minus"> - </button>
+                            <div class="transport-stops-value" id="{{tt.pk}}transport-stops-value"> 1 </div>
+                            <button type="button" class="button square" id="stops-plus"> + </button>
+                        </div>
+                    
+                        <button type="button" class="button hop-on" id="{{tt.pk}}-hop-on"> Ride! </button>
+                    </div>
                 </div>
             {% endfor %}
+
+            
+            
             </div>
         </div>
     </div>
@@ -278,22 +291,60 @@
             }
         }, 1000);
     }
+
+    function is_in_jail() {
+        var jail_time_finish = '{{jail_time_finish}}' 
+
+        if (jail_time_finish != '') {
+            let draw_challenge_box_div = document.getElementById("draw-challenge-box");
+            draw_challenge_box_div.classList.add('d-none');
+            let public_transport_div = document.getElementById("public-transport");
+            public_transport_div.classList.add('d-none');
+
+            let jail_time_div = document.getElementById("jail_timer");
+            jail_time_div.classList.remove('d-none');
+            jailtime(jail_time_finish)
+        }
+    }
+
+    function public_transport(){
+        coins_available = '{{curr_team.coins}}'
+        
+        let stops_value_div = document.getElementById('transport-stops-value');
+
+        let plus_button = document.getElementById('stops-plus');
+        let minus_button = document.getElementById('stops-minus');
+        console.log(stops_value_div.innerHTML)
+
+        plus_button.onclick = function() {
+            curr_value = Number(stops_value_div.innerHTML);
+            stops_value_div.innerHTML = curr_value + 1
+
+        };
+
+        minus_button.onclick = function() {
+            curr_value = Number(stops_value_div.innerHTML)
+            stops_value_div.innerHTML = curr_value - 1
+        };
+    };
+
+    function transport_dropdown(id) {
+        let counter_div = document.getElementById(`transport-stops-counter-${id}`);
+        if (counter_div.classList.contains("d-none")) {
+            counter_div.classList.remove("d-none");
+        } else {
+            counter_div.classList.add("d-none");
+        }
+    }
     
+
+
     connect();
+    is_in_jail();
+    {% comment %} public_transport(); {% endcomment %}
     
     //Jail Time Logic
-    var jail_time_finish = '{{jail_time_finish}}' 
-
-    if (jail_time_finish != '') {
-        let draw_challenge_box_div = document.getElementById("draw-challenge-box");
-        draw_challenge_box_div.classList.add('d-none');
-        let public_transport_div = document.getElementById("public-transport");
-        public_transport_div.classList.add('d-none');
-
-        let jail_time_div = document.getElementById("jail_timer");
-        jail_time_div.classList.remove('d-none');
-        jailtime(jail_time_finish)
-    }
+    
 
 </script> 
 
