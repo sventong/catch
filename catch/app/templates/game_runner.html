@@ -77,7 +77,11 @@
 
     <div class="row" id="public-transport">
         <div class="col-10 offset-1 transport-types">
-            <div class="description">Use public transport to get around.</div>
+            <div class="description">
+                Use public transport to get around. <br>
+                You have to input the number of stations you want to ride, BEFORE getting on the public transport. 
+                You are not allowed to add additional stops before getting of. You can get off before, but the excess stops will be counted anyway.
+            </div>
             <div class="box">
             {% for tt in transport_types %}
                 <div class="text-center transportation">
@@ -92,8 +96,8 @@
                             <div class="transport-stops-value" id="transport-stops-value-{{tt.pk}}"> 1 </div>
                             <button onclick="plus({{tt.pk}})" type="button" class="button square"> + </button>
                         </div>
-                    
-                        <button type="button" class="button hop-on" id="{{tt.pk}}-hop-on"> Ride! </button>
+                        
+                        <button onclick="hop_on({{tt.pk}})" type="button" class="button hop-on" id="hop-on-{{tt.pk}}"> Hop-On! </button>
                     </div>
                 </div>
             {% endfor %}
@@ -116,6 +120,7 @@
         let game_id = '{{game.game_id}}'
         let url = `ws://${window.location.host}/ws/game/${game_id}/`
         let curr_team_name = '{{curr_team.team_name}}'
+
         var challenge_pk = ''
 
         const waitSocket = new WebSocket(url)
@@ -198,10 +203,17 @@
             } else if (event === 'CATCH-DENY' && curr_team_name === send_team) {
                 let confirm_catch_div = document.getElementById('confirm-catch')
                 confirm_catch_div.classList.add('d-none')
+            } else if (event === 'HOP-ON' && curr_team_name == send_team){
+                document.getElementById("coins").innerHTML = `${coins} Coins`;
+
+                let transport_stops_divs = document.getElementsByClassName("transport-stops-counter")
+                for (ts_div of transport_stops_divs) {
+                    if (!ts_div.classList.contains("d-none")){
+                        ts_div.classList.add("d-none")
+                    }
+                }
             }
         };
-        
-
 
         document.getElementById('draw-a-challenge').onclick = function() {
             waitSocket.send(JSON.stringify({
@@ -247,7 +259,28 @@
                 "send_team": curr_team_name
             }))
         };
+
+        let hop_on_buttons = document.getElementsByClassName('hop-on')
+        for (ho_btn of hop_on_buttons) {
+            let tt_id = ho_btn.id.slice(-1)
+
+            document.getElementById(`hop-on-${tt_id}`).onclick = function() {
+                let stops_value_div = document.getElementById(`transport-stops-value-${tt_id}`)
+                let stops_value = Number(stops_value_div.innerHTML);
+
+                waitSocket.send(JSON.stringify({
+                    "event": "HOP-ON",
+                    "game_id": game_id,
+                    "send_team": curr_team_name,
+                    "stops": stops_value,
+                    "transport_type_id": tt_id,
+                }))
+
+
+            }
+        }
     };
+
 
     function pad(num) {
         num = num.toString();
@@ -307,27 +340,6 @@
         }
     }
 
-    function public_transport(){
-        coins_available = '{{curr_team.coins}}'
-        
-        let stops_value_div = document.getElementById('transport-stops-value');
-
-        let plus_button = document.getElementById('stops-plus');
-        let minus_button = document.getElementById('stops-minus');
-        console.log(stops_value_div.innerHTML)
-
-        plus_button.onclick = function() {
-            curr_value = Number(stops_value_div.innerHTML);
-            stops_value_div.innerHTML = curr_value + 1
-
-        };
-
-        minus_button.onclick = function() {
-            curr_value = Number(stops_value_div.innerHTML)
-            stops_value_div.innerHTML = curr_value - 1
-        };
-    };
-
     function transport_dropdown(id) {
         let counter_div = document.getElementById(`transport-stops-counter-${id}`);
         if (counter_div.classList.contains("d-none")) {
@@ -339,7 +351,7 @@
     
     function minus(id) {
         let stops_value_div = document.getElementById(`transport-stops-value-${id}`)
-        curr_value = Number(stops_value_div.innerHTML);
+        let curr_value = Number(stops_value_div.innerHTML);
         if (curr_value != 0) {
             stops_value_div.innerHTML = curr_value - 1
         }
@@ -347,14 +359,13 @@
 
     function plus(id) {
         let stops_value_div = document.getElementById(`transport-stops-value-${id}`)
-        curr_value = Number(stops_value_div.innerHTML);
+        let curr_value = Number(stops_value_div.innerHTML);
         stops_value_div.innerHTML = curr_value + 1
     }
 
 
     connect();
     is_in_jail();
-    {% comment %} public_transport(); {% endcomment %}
     
     //Jail Time Logic
     

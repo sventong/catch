@@ -39,3 +39,5 @@ def jail_time_end(team_pk):
         
     else:
         return ""
+    
+

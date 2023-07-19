@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 
-from .models import Challenge, ChallengeDoneByTeam, Team, Game
+from .models import Challenge, ChallengeDoneByTeam, Team, Game, TransportType, TransportDoneByTeam
 from .utils import get_next_element_in_cycle, jail_time_end
 
 class GameConsumer(WebsocketConsumer):
@@ -85,7 +85,6 @@ class GameConsumer(WebsocketConsumer):
                 "challenge_pk": challenge_pk
             }))
 
-
         elif event == 'CATCH':
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
@@ -142,6 +141,28 @@ class GameConsumer(WebsocketConsumer):
             game = Game.objects.get(game_id = game_id)
             Team.objects.filter(game = game, team_name = send_team).update(jail_time_start='', jail_time = '')
 
+        elif event == "HOP-ON":
+            stops = response.get("stops", None)
+            transport_type_id = response.get("transport_type_id", None)
+
+            game = Game.objects.get(game_id = game_id)
+            team = Team.objects.get(game = game, team_name = send_team)
+            transport_type = TransportType.objects.get(pk = transport_type_id)
+
+            cost_of_ride = transport_type.cost_per_station * stops
+            team.coins -= cost_of_ride
+            team.save()
+
+            TransportDoneByTeam.objects.create(transport_type = transport_type,
+                                               team = team,
+                                               stops = stops,
+                                               timestamp = datetime.now())
+
+            self.send(text_data=json.dumps({
+                "event": event,
+                "send_team": send_team,
+                "send_team_coins": team.coins,
+            }))
         
     def catch(self, response):
         
