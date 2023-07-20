@@ -8,7 +8,7 @@ from django.views.generic.base import TemplateView
 from django.conf import settings
 
 from .forms import JoinGameForm, CreateGameForm
-from .models import Game, Team, TransportType, ROLE_CHOICES
+from .models import Game, Team, TransportType, ROLE_CHOICES, ChallengeDoneByTeam
 from .utils import random_game_id, get_next_element_in_cycle, jail_time_end
 
 GOOGLE_MAPS_API_KEY = settings.GOOGLE_MAPS_API_KEY
@@ -68,10 +68,8 @@ def game(request, game_id=""):
     elif state == 'init_game':
         request.session['state'] = 'game'
 
-
     elif state == 'game':
         pass
-    
 
         
     # runner_team = Team.objects.filter(pk=runner_team_pk)
@@ -79,13 +77,20 @@ def game(request, game_id=""):
     print(formatted_jail_time)
     runner_team = Team.objects.filter(game = current_game, role="RUNNER").first()
 
-
+    # Get "open"-challenge if there is
+    open_challenge = ChallengeDoneByTeam.objects.filter(team = current_team, open=True).order_by("-timestamp_start")
+    if open_challenge:
+        open_challenge = open_challenge.first().challenge
+    else:
+        open_challenge = ""
+    
     context = {
         "game": current_game,
         "curr_team": current_team,
         "all_teams": all_teams,
         "jail_time_finish": formatted_jail_time,
-        "transport_types": TransportType.objects.all()
+        "transport_types": TransportType.objects.all(),
+        "open_challenge": open_challenge
     }
 
     request.session['current_game'] = game_id

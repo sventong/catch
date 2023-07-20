@@ -51,8 +51,10 @@ class TransportType(models.Model):
 class ChallengeDoneByTeam(models.Model):
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    successful = models.BooleanField()
-    timestamp = models.DateTimeField()
+    successful = models.BooleanField(default=False)
+    open = models.BooleanField(default=True)
+    timestamp_start = models.DateTimeField(null=True, blank=True)
+    timestamp_end = models.DateTimeField(null=True, blank=True)
     
 
 class TransportDoneByTeam(models.Model):

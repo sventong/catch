@@ -28,7 +28,7 @@ class TransportTypeAdmin(admin.ModelAdmin):
 admin.site.register(TransportType, TransportTypeAdmin)
 
 class ChallengeDoneByTeamAdmin(admin.ModelAdmin):
-    list_display = ('challenge', 'team', 'successful', 'timestamp')
+    list_display = ('challenge', 'team', 'successful', 'open', 'timestamp_start', 'timestamp_end')
     
 admin.site.register(ChallengeDoneByTeam, ChallengeDoneByTeamAdmin)
 

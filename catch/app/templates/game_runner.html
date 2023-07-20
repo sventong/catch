@@ -232,6 +232,7 @@
         };
 
         document.getElementById('challenge-cancel').onclick = function() {
+            challenge_pk = "{{open_challenge.pk}}"
             waitSocket.send(JSON.stringify({
                 "event": "CHALLENGE-CANCEL",
                 "game_id": game_id,
@@ -286,7 +287,6 @@
         }
     };
 
-
     function pad(num) {
         num = num.toString();
         while (num.length < 2) num = "0" + num;
@@ -328,6 +328,30 @@
 
             }
         }, 1000);
+    }
+    
+    function open_challenge() {
+        let open_challenge = '{{open_challenge}}'
+
+        if (open_challenge) {
+            let challenge_reward = "{{open_challenge.reward}}"
+            let challenge_text = '{{open_challenge.challenge_text}}'
+            let challenge_name = "{{open_challenge.name}}"
+
+            let draw_challenge_div = document.getElementById('draw-challenge-box')
+            draw_challenge_div.classList.add('d-none')
+            
+            let challenge_box_div = document.getElementById('challenge-box')
+            challenge_box_div.classList.remove('d-none')
+            
+            let accept_discard_challenge_div = document.getElementById('accept-discard-challenge')
+            accept_discard_challenge_div.classList.remove('d-none');
+            accept_discard_challenge_div.classList.add('d-block');
+            accept_discard_challenge_div.insertAdjacentHTML('afterbegin', `<div id="challenge-reward">${challenge_reward} Transport Tokens</div>`)
+            accept_discard_challenge_div.insertAdjacentHTML('afterbegin', `<div id="challenge-text">${challenge_text}</div>`)
+            accept_discard_challenge_div.insertAdjacentHTML('afterbegin', `<div id="challenge-name">${challenge_name}</div>
+            `)
+        }
     }
 
     function is_in_jail() {
@@ -371,6 +395,7 @@
 
     connect();
     is_in_jail();
+    open_challenge();
     
     //Jail Time Logic
     

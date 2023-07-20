@@ -37,9 +37,20 @@ class GameConsumer(WebsocketConsumer):
         game_id = response.get('game_id', None)
 
         if event == 'GET-CHALLENGE':
-            
-            all_challenges = Challenge.objects.all()
-            random_challenge = random.choice(list(all_challenges))
+            game = Game.objects.get(game_id = game_id)
+            team = Team.objects.get(game = game, team_name = send_team)
+
+            cdbt = ChallengeDoneByTeam.objects.filter(team = team).values_list("challenge__pk", flat=True).distinct()
+            print(cdbt)
+            all_avail_challenges = Challenge.objects.filter().exclude(pk__in=cdbt)
+            print(all_avail_challenges)
+            random_challenge = random.choice(list(all_avail_challenges))
+
+            ChallengeDoneByTeam.objects.create(challenge = random_challenge,
+                                               team = team,
+                                               successful = False,
+                                               open = True,
+                                               timestamp_start = datetime.now())
 
             self.send(text_data=json.dumps({
                 "event": event,
@@ -59,12 +70,9 @@ class GameConsumer(WebsocketConsumer):
 
             team.coins = team.coins + challenge.reward
             team.save()
-            
-            ChallengeDoneByTeam.objects.create(challenge = challenge,
-                                               team = team,
-                                               successful = True,
-                                               timestamp = datetime.now())
 
+            ChallengeDoneByTeam.objects.filter(challenge = challenge, team = team).update(successful=True, open=False, timestamp_end=datetime.now())
+            
             self.send(text_data=json.dumps({
                 "event": event,
                 "send_team": send_team,
@@ -73,11 +81,14 @@ class GameConsumer(WebsocketConsumer):
 
         elif event == 'CHALLENGE-CANCEL':
             challenge_pk = response.get("challenge_pk", None)
+            challenge = Challenge.objects.get(pk=challenge_pk)
             game = Game.objects.get(game_id = game_id)
             Team.objects.filter(game = game, team_name = send_team).update(jail_time_start=datetime.now(), jail_time = 1)
             team = Team.objects.get(game = game, team_name = send_team)
             formatted_jail_time = jail_time_end(team.pk)
-            print(formatted_jail_time)
+
+            ChallengeDoneByTeam.objects.filter(challenge=challenge, team=team).update(successful=False, open=False, timestamp_end=datetime.now())
+
             self.send(text_data=json.dumps({
                 "event": event,
                 "send_team": send_team,
@@ -96,7 +107,6 @@ class GameConsumer(WebsocketConsumer):
             )
 
         elif event == 'CATCH-SUCCESS':
-            print("Catchsuccessconsumer")
             current_game = Game.objects.get(game_id = game_id)
             current_team = Team.objects.get(team_name = send_team, game = current_game)
             catched_team = Team.objects.get(game = current_game, role = 'RUNNER')
@@ -104,18 +114,17 @@ class GameConsumer(WebsocketConsumer):
             all_teams_pk = Team.objects.filter(game = current_game).values_list("pk", flat=True)
         
             next_team = get_next_element_in_cycle(catched_team.pk, list(all_teams_pk))
-            print(next_team)
+            
             Team.objects.filter(pk = catched_team.pk).update(role = 'CHASER')      
             Team.objects.filter(pk = next_team.pk).update(role = 'RUNNER')      
-            # catched_team.role = 'CHASER'
-            # next_team.role = 'RUNNER'
-            # catched_team.save()
-            # next_team.save()
-            print(next_team.team_name)
-            print(next_team.role)
+            
             Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 5)
+            
+            if response.get("challenge_pk", None) != None:
+                challenge_pk = response.get("challenge_pk", None)
+                challenge = Challenge.objects.get(pk=challenge_pk)
+                ChallengeDoneByTeam.objects.filter(challenge=challenge, team=current_team).update(successful=False, open=False, timestamp_end=datetime.now())
                 
-            print("catch success end")
             
             async_to_sync(self.channel_layer.group_send)(
                 self.room_group_name,
