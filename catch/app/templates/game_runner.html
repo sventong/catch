@@ -232,7 +232,13 @@
         };
 
         document.getElementById('challenge-cancel').onclick = function() {
-            challenge_pk = "{{open_challenge.pk}}"
+            /*TODO 
+            challenge_pk right now is only known when refresh
+            we have to get the pk through the displayed challenge. this way we can guarantee to get the pk
+            */
+            if challenge_pk = "":
+                challenge_pk = "{{open_challenge.pk}}"
+                
             waitSocket.send(JSON.stringify({
                 "event": "CHALLENGE-CANCEL",
                 "game_id": game_id,
