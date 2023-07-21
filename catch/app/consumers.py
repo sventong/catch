@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 
-from .models import Challenge, ChallengeDoneByTeam, Team, Game, TransportType, TransportDoneByTeam
+from .models import Challenge, ChallengeDoneByTeam, Team, Game, TransportType, TransportDoneByTeam, Catch
 from .utils import get_next_element_in_cycle, jail_time_end
 
 class GameConsumer(WebsocketConsumer):
@@ -69,6 +69,7 @@ class GameConsumer(WebsocketConsumer):
             team = Team.objects.get(game = game, team_name = send_team)
 
             team.coins = team.coins + challenge.reward
+            team.points += 1
             team.save()
 
             ChallengeDoneByTeam.objects.filter(challenge = challenge, team = team).update(successful=True, open=False, timestamp_end=datetime.now())
@@ -80,7 +81,8 @@ class GameConsumer(WebsocketConsumer):
             }))
 
         elif event == 'CHALLENGE-CANCEL':
-            challenge_pk = response.get("challenge_pk", None)
+            challenge_pk = response.get("challenge_pk")
+            print(challenge_pk)
             challenge = Challenge.objects.get(pk=challenge_pk)
             game = Game.objects.get(game_id = game_id)
             Team.objects.filter(game = game, team_name = send_team).update(jail_time_start=datetime.now(), jail_time = 1)
@@ -173,6 +175,29 @@ class GameConsumer(WebsocketConsumer):
                 "send_team_coins": team.coins,
             }))
         
+        elif event == "UPDATE-POINTS":
+            game = Game.objects.get(game_id = game_id)
+            team = Team.objects.get(game = game, team_name = send_team, role="RUNNER")            
+            
+            team.points += 1
+            team.save()
+
+            other_team_points = Team.objects.filter(game = game).exclude(team_name = send_team).values_list("points", flat=True)
+
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'update_points',
+                    'event': event,
+                    'game_id': game_id,
+                    'send_team': send_team,
+                    'send_team_points': team.points,
+                    'other_team_points': list(other_team_points)
+                }
+            )
+
+
+
     def catch(self, response):
         
         event = response["event"]
@@ -185,12 +210,9 @@ class GameConsumer(WebsocketConsumer):
 
     def catch_success(self, response):
         
-        print("catch success start")
         event = response["event"]
         game_id = response["game_id"]
         send_team = response["send_team"]
-    
-        
 
         self.send(text_data=json.dumps({
             "send_team": send_team,
@@ -207,6 +229,20 @@ class GameConsumer(WebsocketConsumer):
             "send_team": send_team,
             "event": event,
         }))
+
+    def update_points(self, response):
+        event = response["event"]
+        send_team = response["send_team"]
+        send_team_points = response["send_team_points"]
+        other_team_points = response["other_team_points"]
+
+        self.send(text_data=json.dumps({
+            "send_team": send_team,
+            "event": event,
+            "send_team_points": send_team_points,
+            "other_team_points": other_team_points
+        }))
+
 
 class WaitingConsumer(WebsocketConsumer):
 
