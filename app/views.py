@@ -52,7 +52,7 @@ def game(request, game_id=""):
             Team.objects.filter(game_id = current_game).update(role="CHASER")
             random_team = random.choice(list(all_teams))
             Team.objects.filter(pk = random_team.pk).update(role="RUNNER")
-            Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 5)
+            Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 3)
             
             request.session['state'] = 'init_game'
 
