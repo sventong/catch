@@ -40,7 +40,8 @@ class GameConsumer(WebsocketConsumer):
             game = Game.objects.get(game_id = game_id)
             team = Team.objects.get(game = game, team_name = send_team)
 
-            cdbt = ChallengeDoneByTeam.objects.filter(team = team).values_list("challenge__pk", flat=True).distinct()
+            all_teams = Team.objects.filter(game=game).values_list("pk", flat=True).distinct()
+            cdbt = ChallengeDoneByTeam.objects.filter(team__in = all_teams).values_list("challenge__pk", flat=True).distinct()
             print(cdbt)
             all_avail_challenges = Challenge.objects.filter().exclude(pk__in=cdbt)
             print(all_avail_challenges)
