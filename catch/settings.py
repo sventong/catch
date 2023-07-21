@@ -177,4 +177,4 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'app/static')]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CSRF_TRUSTED_ORIGINS = ["catch-me-c1ad50dcb72d.herokuapp.com/"]
+CSRF_TRUSTED_ORIGINS = ["https://catch-me-c1ad50dcb72d.herokuapp.com/"]
