@@ -33,10 +33,6 @@ def index(request):
 #     return HttpResponse(game_id)
 
     # nr_of_teams = teams.count()
-    
-
-    
-    
 
 def game(request, game_id=""):
 
@@ -97,9 +93,6 @@ def game(request, game_id=""):
         return render(request, 'game_runner.html', context)
     else:
         return render(request, 'game_chaser.html', context)
-
-
-
 
 def create_game(request):
     
