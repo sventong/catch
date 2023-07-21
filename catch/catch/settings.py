@@ -88,8 +88,12 @@ WSGI_APPLICATION = 'catch.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'catch_db', 
+        'USER': 'default',
+        'PASSWORD': 'GjRW0upqPk9s',
+        'HOST': 'ep-morning-sea-508573-pooler.eu-central-1.postgres.vercel-storage.com', 
+        'PORT': '5432',
     }
 }
 
