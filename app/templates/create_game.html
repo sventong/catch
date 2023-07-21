@@ -18,6 +18,7 @@
 
     <div class="row">
         <div class="col-md-12 text-center">
+            {% csrf_token %}
             <form method="post" action="/waiting_for_teams/">
                 {% csrf_token %}
                 <div class="form-group">
