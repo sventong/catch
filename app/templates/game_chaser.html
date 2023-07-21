@@ -38,7 +38,7 @@
 
         let game_id = '{{game.game_id}}'
         let curr_team_name = '{{curr_team.team_name}}'
-        let url = `ws://${window.location.host}/ws/game/${game_id}/`
+        let url = `wss://${window.location.host}/ws/game/${game_id}/`
     
         const waitSocket = new WebSocket(url)
     

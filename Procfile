@@ -1,1 +1,1 @@
-web: gunicorn catch.wsgi
+web: daphne -b 0.0.0.0 -p $PORT catch.asgi:application
