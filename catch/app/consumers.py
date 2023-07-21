@@ -120,7 +120,7 @@ class GameConsumer(WebsocketConsumer):
             Team.objects.filter(pk = catched_team.pk).update(role = 'CHASER')      
             Team.objects.filter(pk = next_team.pk).update(role = 'RUNNER')      
             
-            Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 5)
+            Team.objects.filter(game_id = current_game, role="CHASER").update(jail_time_start=datetime.now(), jail_time = 1)
             
             if response.get("challenge_pk", None) != None:
                 challenge_pk = response.get("challenge_pk", None)

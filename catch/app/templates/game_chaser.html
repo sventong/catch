@@ -5,7 +5,7 @@
 
 
 <div class="container h-100 align-items-center text-center">
-    <h1> CHASE </h1>
+    <h1> Chase! </h1>
     <h3> {{curr_team.team_name}} </h3>
     <div class="box">
         <div id="jail_timer"></div>
@@ -92,6 +92,9 @@
 
     function jailtime() {
         let jail_time_finish = '{{jail_time_finish}}'
+        if (jail_time_finish) {
+            document.getElementById("catch-button").classList.add("d-none")
+        }
         var countDownDate = new Date(jail_time_finish).getTime();
 
         // Update the count down every 1 second
@@ -115,6 +118,8 @@
             if (distance < 0 || jail_time_finish == "") {
                 clearInterval(x);
                 document.getElementById("jail_timer").innerHTML = "Start Chasing!";
+                document.getElementById("catch-button").classList.remove("d-none")
+
             }
         }, 1000);
     }
