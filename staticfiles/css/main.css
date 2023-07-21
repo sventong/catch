@@ -1,0 +1,161 @@
+@import url('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css');
+
+body,html {
+    font-family: 'Press Start 2P', cursive;
+    font-weight: 100;
+    background: #c4ceff;
+    color: #000000;
+    letter-spacing: 1px;
+    height: 100vh;
+}
+
+.container {
+    margin-top: 3em;
+}
+
+.row {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.box {
+    background-color: #6c80e0;
+    border: 4px solid black;
+    border-radius: 0px;
+    padding: 10px 10px;
+    text-align: center;
+    font-size: 12px;
+    vertical-align: middle;
+    width: auto;
+}
+
+.description {
+    font-size: 10px;
+    text-align: left;
+}
+
+.description-small {
+    font-size: 6px;
+}
+
+.game-id-box {
+    border: #000000;
+    border-style: solid;
+    padding-top: 2em;
+    padding-bottom: 2em;
+    display: block;
+}
+
+.secret-btn {
+    visibility: hidden;
+}
+
+.draw-challenge-btn {
+    margin: auto;
+}
+
+.challenge-box {
+    text-align: left;
+}
+
+#challenge-name {
+    text-decoration: underline;
+    text-align: left;
+    float: left;
+    width: 80%;
+}
+
+#challenge-cancel {
+    float: right;
+    color: red;
+    -webkit-text-stroke: 1px black;
+}
+
+#challenge-text {
+    padding-top: 2em;
+    padding-bottom: 1em;
+    font-size: 10px;
+    text-align: left;
+}
+
+#challenge-reward {
+    text-align: right;
+}
+
+/* #accept-discard-challenge {
+    display: none;
+} */
+
+/* Button */
+.button {
+    font-family: 'Press Start 2P', cursive;
+    background-color: #c4ceff;
+    border: 4px solid black;
+    border-radius: 6px;
+    color: black;
+    margin: 1em 1em;
+    padding: 15px 15px;
+    text-align: center;
+    font-size: 12px;
+    vertical-align: middle;
+    width: 90%
+}
+
+.button:hover {
+    box-shadow: -6px 6px 0 black;
+}
+
+
+
+/* #confirm-catch {
+    display: none;
+} */
+
+.confirm-catch-box {
+    display: flex;
+}
+
+.half {
+    width: 50%
+}
+
+/* .transport-stops-btn {
+    height: 0;
+    width: 10%;
+} */
+
+.transport-stops-value {
+    font-size: large;
+    margin-top: auto;
+    margin-bottom: auto;
+    min-width: 50px;
+}
+
+.square {
+    padding: 0;
+    text-align: center;
+    width: 10vw;
+    height: 10vw;
+    min-width: 40px;
+    max-width: 60px;
+    min-height: 40px;
+    max-height: 60px;
+}
+
+.transport-stops-counter {
+    margin: 0px;
+}
+
+.hop-on {
+    background-color: greenyellow;
+    width: 60%;
+    margin-top: 0px;
+}
+
+/* .transportation {
+    margin-bottom: 50px;
+} */
+
+/* .transportation:last-child {
+    margin-bottom: 0px;
+} */
