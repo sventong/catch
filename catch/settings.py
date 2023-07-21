@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+import dj_database_url
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -21,12 +22,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-u96l3tzte06=u4%ek@wz$+4ea0z2*z%xi7fldbjlf&yuv-qu!d'
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+)
+IS_HEROKU_APP = "DYNO" in os.environ and not "CI" in os.environ
 
+if not IS_HEROKU_APP:
+    DEBUG = True
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'catch-me-c1ad50dcb72d.herokuapp.com']
+if IS_HEROKU_APP:
+    ALLOWED_HOSTS = ["*"]
+else:
+    ALLOWED_HOSTS = ['127.0.0.1', 'catch-me-c1ad50dcb72d.herokuapp.com']
 
 
 # Application definition
@@ -34,6 +43,7 @@ ALLOWED_HOSTS = ['127.0.0.1', 'catch-me-c1ad50dcb72d.herokuapp.com']
 INSTALLED_APPS = [
     'daphne',
     'widget_tweaks',
+    "whitenoise.runserver_nostatic",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -54,6 +64,7 @@ CHANNEL_LAYERS = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -86,16 +97,40 @@ WSGI_APPLICATION = 'catch.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'd2hs3il9v25nqh', 
-        'USER': 'zcffamwdcbmlac',
-        'PASSWORD': 'e4fa13b04b18354bf32e3d56b6544c1b759e96fe32add3c84acd15b4834d1e9e',
-        'HOST': 'ec2-18-203-205-71.eu-west-1.compute.amazonaws.com', 
-        'PORT': '5432',
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'd2hs3il9v25nqh', 
+#         'USER': 'zcffamwdcbmlac',
+#         'PASSWORD': 'e4fa13b04b18354bf32e3d56b6544c1b759e96fe32add3c84acd15b4834d1e9e',
+#         'HOST': 'ec2-18-203-205-71.eu-west-1.compute.amazonaws.com', 
+#         'PORT': '5432',
+#     }
+# }
+
+
+if IS_HEROKU_APP:
+    # In production on Heroku the database configuration is derived from the `DATABASE_URL`
+    # environment variable by the dj-database-url package. `DATABASE_URL` will be set
+    # automatically by Heroku when a database addon is attached to your Heroku app. See:
+    # https://devcenter.heroku.com/articles/provisioning-heroku-postgres
+    # https://github.com/jazzband/dj-database-url
+    DATABASES = {
+        "default": dj_database_url.config(
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        ),
     }
-}
+else:
+    # When running locally in development or in CI, a sqlite database file will be used instead
+    # to simplify initial setup. Longer term it's recommended to use Postgres locally too.
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 # Password validation
