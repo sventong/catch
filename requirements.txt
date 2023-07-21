@@ -9,9 +9,12 @@ cryptography==41.0.1
 daphne==4.0.0
 Django==4.2.2
 django-widget-tweaks==1.4.12
+gunicorn==21.2.0
 hyperlink==21.0.0
 idna==3.4
 incremental==22.10.0
+packaging==23.1
+psycopg2-binary==2.9.6
 pyasn1==0.5.0
 pyasn1-modules==0.3.0
 pycparser==2.21
