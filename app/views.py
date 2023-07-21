@@ -11,9 +11,6 @@ from .forms import JoinGameForm, CreateGameForm
 from .models import Game, Team, TransportType, ROLE_CHOICES, ChallengeDoneByTeam
 from .utils import random_game_id, get_next_element_in_cycle, jail_time_end
 
-GOOGLE_MAPS_API_KEY = settings.GOOGLE_MAPS_API_KEY
-
-
 # Create your views here.
 
 def index(request):
