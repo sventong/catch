@@ -25,8 +25,8 @@
             <div class="description">You have been catched. Do you confirm the catch? If you do, your Jail Time will start.</div>
             <div class="box confirm-catch-box d-flex">
                 <div class="half">
-                    {% csrf_token %}
                     <form>
+                        {% csrf_token %}
                         <input type="hidden" id="title" name="action" value="confirm-catch"/>
                         <a href="{% url 'game' game_id=game.game_id %}">
                             <button type="submit" class="button btn-lg" id="catch-success">
