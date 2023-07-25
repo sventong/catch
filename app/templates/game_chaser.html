@@ -80,7 +80,7 @@
             } else if (event === 'CATCH-DENY' && curr_team_name !== send_team) {
                 let catch_div = document.getElementById('catch')
                 catch_div.style.display = 'block'
-            } else if (event === 'GET-CHALLENGE' curr_team_name !== send_team) {
+            } else if (event === 'GET-CHALLENGE' && curr_team_name !== send_team) {
                 let challenge_name = data['challenge_name']
                 let challenge_text = data['challenge_text']
                 document.getElementById('opponent-challenge').classList.remove('d-none')
