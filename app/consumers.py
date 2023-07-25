@@ -53,14 +53,18 @@ class GameConsumer(WebsocketConsumer):
                                                open = True,
                                                timestamp_start = datetime.now())
 
-            self.send(text_data=json.dumps({
-                "event": event,
-                "send_team": send_team,
-                "challenge_pk": random_challenge.pk,
-                "challenge_name": random_challenge.name,
-                "challenge_text": random_challenge.challenge_text,
-                "challenge_reward": random_challenge.reward,
-            }))
+            async_to_sync(self.channel_layer.group_send)(
+                self.room_group_name,
+                {
+                    'type': 'get_challenge',
+                    "event": event,
+                    "send_team": send_team,
+                    "challenge_pk": random_challenge.pk,
+                    "challenge_name": random_challenge.name,
+                    "challenge_text": random_challenge.challenge_text,
+                    "challenge_reward": random_challenge.reward,
+                }
+            )
         
         elif event == 'CHALLENGE-SUCCESSFUL':
             
@@ -243,6 +247,25 @@ class GameConsumer(WebsocketConsumer):
             "send_team_points": send_team_points,
             "other_team_points": other_team_points
         }))
+
+    def get_challenge(self, response):
+        event = response["event"]
+        send_team = response["send_team"]
+        challenge_pk = response["challenge_pk"]
+        challenge_name = response["challenge_name"]
+        challenge_text = response["challenge_text"]
+        challenge_reward = response["challenge_reward"]
+
+        self.send(text_data=json.dumps({
+            "send_team": send_team,
+            "event": event,
+            "challenge_pk": challenge_pk,
+            "challenge_name": challenge_name,
+            "challenge_text": challenge_text,
+            "challenge_reward": challenge_reward,
+        }))
+        
+        
 
 
 class WaitingConsumer(WebsocketConsumer):

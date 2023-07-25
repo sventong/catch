@@ -26,6 +26,15 @@
         </div>
     </div>
 
+    <div class="row d-none" id="opponent-challenge">
+        <div class="col-md-10 offset-1 text-center">
+            <div class="box">
+                <div id="challenge-name"></div>
+                <div id="challenge-text"></div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 
@@ -71,6 +80,12 @@
             } else if (event === 'CATCH-DENY' && curr_team_name !== send_team) {
                 let catch_div = document.getElementById('catch')
                 catch_div.style.display = 'block'
+            } else if (event === 'GET-CHALLENGE' curr_team_name !== send_team) {
+                let challenge_name = data['challenge_name']
+                let challenge_text = data['challenge_text']
+                document.getElementById('opponent-challenge').classList.remove('d-none')
+                document.getElementById('challenge-name').innerHTML(challenge_name)
+                document.getElementById('challenge-text').innerHTML(challenge_text)
             }
         };
 

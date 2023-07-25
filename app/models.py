@@ -63,3 +63,17 @@ class TransportDoneByTeam(models.Model):
     stops = models.IntegerField()
     timestamp = models.DateTimeField()
 
+
+
+
+# ROLE_CHOICES = {
+#     ('U1', "U1"),
+#     ('U2', "U2"),
+#     ('U3', "U3"),
+#     ('U4', "U4"),
+#     ('U5', "U5"),
+#     ('U6', "U6")
+# }
+# class UbahnStation(models.Model):
+#     name = models.CharField(max_length=20)
+#     line = 
