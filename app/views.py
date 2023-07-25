@@ -153,17 +153,16 @@ def join_game(request):
         form = JoinGameForm(request.POST) 
         if form.is_valid():
             game_id = form.cleaned_data['game_id'].upper()
-            game = Game.objects.filter(game_id=game_id)
-            if game.exists():                
+            game = Game.objects.filter(game_id=game_id).order_by('-created_at')
+            if game.exists():
                 team_name = form.cleaned_data['team_name']
 
                 request.session['current_game'] = game_id
                 request.session['current_team'] = team_name
                 request.session['state'] = 'waiting'
 
-                team = Team(game = game.first(), team_name = team_name, game_master = False)
-                team.save()
-
+                team = Team.objects.get_or_create(game = game.first(), team_name = team_name, game_master = False)[0]
+                print
                 all_teams = Team.objects.filter(game = game.first()).values_list("team_name", flat=True)
                 
                 context = {

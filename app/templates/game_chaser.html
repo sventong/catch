@@ -27,7 +27,8 @@
     </div>
 
     <div class="row d-none" id="opponent-challenge">
-        <div class="col-md-10 offset-1 text-center">
+        <div class="col-md-12 text-center">
+            <div class="description"> Your opponent has drawn a new challenge: </div>
             <div class="box">
                 <div id="challenge-name"></div>
                 <div id="challenge-text"></div>
@@ -47,7 +48,7 @@
 
         let game_id = '{{game.game_id}}'
         let curr_team_name = '{{curr_team.team_name}}'
-        let url = `wss://${window.location.host}/ws/game/${game_id}/`
+        let url = `ws://${window.location.host}/ws/game/${game_id}/`
     
         const waitSocket = new WebSocket(url)
     
@@ -84,8 +85,8 @@
                 let challenge_name = data['challenge_name']
                 let challenge_text = data['challenge_text']
                 document.getElementById('opponent-challenge').classList.remove('d-none')
-                document.getElementById('challenge-name').innerHTML(challenge_name)
-                document.getElementById('challenge-text').innerHTML(challenge_text)
+                document.getElementById('challenge-name').innerHTML = challenge_name
+                document.getElementById('challenge-text').innerHTML = challenge_text
             }
         };
 

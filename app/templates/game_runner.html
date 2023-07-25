@@ -127,7 +127,7 @@
     function connect() {
         
         let game_id = '{{game.game_id}}'
-        let url = `wss://${window.location.host}/ws/game/${game_id}/`
+        let url = `ws://${window.location.host}/ws/game/${game_id}/`
         let curr_team_name = '{{curr_team.team_name}}'
 
         var challenge_pk = ''
@@ -158,7 +158,7 @@
             let jail_time_finish = data['jail_time_finish']
 
             // Global variables needed on for view
-            challenge_pk = data['challenge_pk']
+            var challenge_pk = data['challenge_pk']
 
             if (event === 'GET-CHALLENGE' && send_team == curr_team_name){
                 let draw_challenge_div = document.getElementById('draw-challenge-box')
